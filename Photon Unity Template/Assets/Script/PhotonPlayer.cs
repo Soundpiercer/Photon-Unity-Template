@@ -51,7 +51,8 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Jump()
     {
-        gameObject.transform.localPosition += UP;
+        animator.SetTrigger("Jump");
+        //gameObject.transform.localPosition += UP;
     }
 
     public void HasKilled()
