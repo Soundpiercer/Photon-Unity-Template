@@ -150,8 +150,8 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private const float X_DISTANCE_FROM_BODY = 24f;
     private const float BULLET_SPEED = 10f;
 
+    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
     private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 135f);
-    private readonly Vector3 UP = new Vector3(0, 30f);
 
     private void GameSetup()
     {
@@ -178,11 +178,13 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private void StartPhotonGame()
     {
         int id = SelectTransform();
+        bool isBackwards = id != 0;
 
+        // instantiate the player with position and rotation specified.
         myPlayer = PhotonNetwork.Instantiate(
             photonPlayerPrefab.name,
             spawnPoints[id].position,
-            Quaternion.identity,
+            isBackwards ? QUATERNION_BACKWARDS : Quaternion.identity,
             0)
             .GetComponent<PhotonPlayer>();
 
