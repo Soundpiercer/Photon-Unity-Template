@@ -147,11 +147,11 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     [Header("Game Panel")]
     public Text synchronizationTimeText;
 
-    private const float X_DISTANCE_FROM_BODY = 40f;
-    private const float BULLET_SPEED = 8f;
+    private const float X_DISTANCE_FROM_BODY = 24f;
+    private const float BULLET_SPEED = 10f;
 
-    private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 90);
-    private readonly Vector3 UP = new Vector3(0, 10);
+    private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 135f);
+    private readonly Vector3 UP = new Vector3(0, 30f);
 
     private void GameSetup()
     {
