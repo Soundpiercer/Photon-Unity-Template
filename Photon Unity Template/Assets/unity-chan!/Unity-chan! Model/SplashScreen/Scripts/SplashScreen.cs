@@ -4,10 +4,11 @@ using System.Collections;
 
 namespace UnityChan
 {
-	[ExecuteInEditMode]
+	//[ExecuteInEditMode]
 	public class SplashScreen : MonoBehaviour
 	{
-		void NextLevel ()
+        // Executed by Animator
+		private void NextLevel ()
 		{
             // Application.LoadLevel(Application.loadedLevel + 1); Deprecated
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);

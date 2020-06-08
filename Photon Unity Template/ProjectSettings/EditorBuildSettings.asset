@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/unity-chan!/Unity-chan! Model/SplashScreen/SplashScreen_Light.unity
+    guid: 3ad4f8c442f444c5e966898c99704b0f
+  - enabled: 1
     path: Assets/Scenes/PhotonGame.unity
     guid: ecf32da3f37b948e3862b29dff75c9ca
+  - enabled: 1
+    path: Assets/unity-chan!/Unity-chan! Model/Scenes/ActionCheck.unity
+    guid: 82af19ed76a8ed74fb1dd5d45c780da8
   m_configObjects: {}
