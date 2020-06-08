@@ -143,13 +143,15 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public GameObject photonPlayerPrefab;
     public GameObject photonBulletPrefab;
     private PhotonPlayer myPlayer;
-    private readonly Vector3 UP = new Vector3(0, 10);
-
+    
     [Header("Game Panel")]
     public Text synchronizationTimeText;
 
-    private const float DISTANCE_FROM_BODY = 60f;
-    private const float BULLET_SPEED = 6f;
+    private const float X_DISTANCE_FROM_BODY = 40f;
+    private const float BULLET_SPEED = 8f;
+
+    private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 90);
+    private readonly Vector3 UP = new Vector3(0, 10);
 
     private void GameSetup()
     {
@@ -231,7 +233,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
         PhotonBulletBehaviour bullet = PhotonNetwork.Instantiate(
             photonBulletPrefab.name,
-            myPlayer.transform.position + (fireDirection * DISTANCE_FROM_BODY),
+            myPlayer.transform.position + (fireDirection * X_DISTANCE_FROM_BODY) + Y_DISTANCE_FROM_GROUND,
             Quaternion.identity,
             0)
             .GetComponent<PhotonBulletBehaviour>();
