@@ -8,7 +8,7 @@ namespace UnityChan
 	public class SplashScreen : MonoBehaviour
 	{
         // Executed by Animator
-		private void NextLevel ()
+		public void NextLevel ()
 		{
             // Application.LoadLevel(Application.loadedLevel + 1); Deprecated
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
