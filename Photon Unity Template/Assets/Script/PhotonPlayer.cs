@@ -7,6 +7,12 @@ public class PhotonPlayer : MonoBehaviour
 {
     public PhotonView view;
     public Animator animator;
+    public AudioSource audioSource;
+    public AudioClip initVoice;
+    public AudioClip[] jumpVoice;
+    public AudioClip fireVoice;
+    public AudioClip[] damageVoice;
+    public AudioClip killedVoice;
 
     public MeshRenderer cube;
     public TextMesh hpText;
@@ -34,6 +40,9 @@ public class PhotonPlayer : MonoBehaviour
         }
 
         animator.speed = ANIMATOR_SPEED;
+
+        audioSource.clip = initVoice;
+        audioSource.Play();
     }
 
     private void Update()
@@ -52,17 +61,31 @@ public class PhotonPlayer : MonoBehaviour
     public void Jump()
     {
         animator.SetTrigger("Jump");
-        //gameObject.transform.localPosition += UP;
+
+        audioSource.clip = jumpVoice[Random.Range(0, jumpVoice.Length)];
+        audioSource.Play();
+    }
+
+    public void Fire()
+    {
+        audioSource.clip = fireVoice;
+        audioSource.Play();
     }
 
     public void GotDamaged(int damage)
     {
         hp -= damage;
         animator.SetTrigger("Damaged");
+
+        audioSource.clip = damageVoice[Random.Range(0, jumpVoice.Length)];
+        audioSource.Play();
     }
 
     public void HasKilled()
     {
         gameObject.transform.position = STANDBY_POSITION;
+
+        audioSource.clip = killedVoice;
+        audioSource.Play();
     }
 }
