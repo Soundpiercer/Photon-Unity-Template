@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 
-public class PhotonGameScene : MonoBehaviourPunCallbacks
+public class PhotonGameController : MonoBehaviourPunCallbacks
 {
     [Header("Panels")]
     public GameObject lobbyPanel;
