@@ -13,7 +13,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     public InputField messageInputField;
 
     private ChatClient chatClient;
-    private bool isConnected = false;
     private string playerName = string.Empty;
 
     private const string PHOTON_CHAT_ID = ""; // must be defined
@@ -34,8 +33,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
         yield return new WaitUntil(() => chatClient.CanChat);
         Debug.Log("<b>[Photon Chat Controller] >>>>>> Photon Chat Init Success!</b>");
-
-        isConnected = true;
     }
 
     private string GetPlayerName()
@@ -155,7 +152,6 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         playerName = string.Empty;
         chatText.text = string.Empty;
 
-        isConnected = false;
         chatClient = null;
     }
 }
