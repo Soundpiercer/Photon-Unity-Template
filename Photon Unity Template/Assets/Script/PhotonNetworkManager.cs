@@ -6,9 +6,12 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 
+/// <summary>
+/// Manages Photon Engine Connection.
+/// </summary>
 public class PhotonNetworkManager : MonoBehaviourPunCallbacks
 {
-    // Simplified Singleton : Unity-specified. should be different in the outside of Unity!
+    // Simplified Singleton : Unity-specified. implementations should be different in the outside of Unity!
     #region Singleton
     public static PhotonNetworkManager Instance;
 
@@ -28,7 +31,7 @@ public class PhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         if (!isInitialized)
         {
-            PhotonNetwork.ConnectUsingSettings(); // Connects to Photon master servers
+            PhotonNetwork.ConnectUsingSettings(); // Connects to Photon master server
             isInitialized = true;
 
             this.onInitSuccess = onInitSuccess;
@@ -37,7 +40,7 @@ public class PhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        // Realtime
+        // Scene Synchronization causes several side effects, so we will use Photon Game in one scene
         //PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.JoinLobby();
         onInitSuccess(PhotonNetwork.CloudRegion);

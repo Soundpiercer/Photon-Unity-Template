@@ -8,6 +8,8 @@ using Photon.Realtime;
 
 public class PhotonGameController : MonoBehaviourPunCallbacks
 {
+    public PhotonChatController chatController;
+
     [Header("Panels")]
     public GameObject lobbyPanel;
     public GameObject gamePanel;
@@ -20,6 +22,9 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     private string defaultSuccessMessage = string.Empty;
     private const string QUICKSTART_SUCCESS_MESSAGE = "\nSuccessfully joined by QuickStart, ";
+    private const string ONJOINROOMFAILED_MESSAGE = "Failed to join a room";
+    private const string ONCREATEROOMFAILED_MESSAGE = "Failed to create room... trying again";
+    private const int MAX_CCU_FOR_FREE_TIER = 20;
 
     private void Start()
     {
@@ -52,11 +57,9 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     }
 
     #region UI Interactions
-    /// <summary>
-    /// Joins an existing random room
-    /// </summary>
     public void QuickStart()
     {
+        // If there is no room, OnJoinRandomFailed -> CreateRandomRoom will be called. The player will be Room Host.
         PhotonNetwork.JoinRandomRoom();
 
         quickStartButton.SetActive(false);
@@ -84,30 +87,31 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     }
     #endregion
 
-    private void CreateRandomRoom()
+    #region MonoBehaviourPunCallbacks Event Listener
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        photonDetailText.text = ONJOINROOMFAILED_MESSAGE;
+        CreateRandomRoom();
+    }
+
+    private void CreateRandomRoom() // trying to create our own room
     {
         photonDetailText.text = "Creating room now";
-        int r = Random.Range(0, 20); // allows 20 CCU users per free tier account
+        int r = Random.Range(0, MAX_CCU_FOR_FREE_TIER); // Allows Up to Maximum Users for Free Tier (20)
 
         RoomOptions option = new RoomOptions()
         {
             IsVisible = true,
             IsOpen = true,
-            MaxPlayers = 20
+            MaxPlayers = MAX_CCU_FOR_FREE_TIER
         };
 
         PhotonNetwork.CreateRoom("Room " + r, option);
     }
 
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {
-        photonDetailText.text = "Failed to join a room";
-        CreateRandomRoom();
-    }
-
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
-        photonDetailText.text = "Failed to create room... trying again";
+        photonDetailText.text = ONCREATEROOMFAILED_MESSAGE;
         CreateRandomRoom();
     }
 
@@ -116,30 +120,39 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         photonDetailText.text = string.Empty;
         GameSetup();
     }
+    #endregion
 
     #region Photon Game
     [Header("Photon Game")]
     public Transform[] spawnPoints;
-    public GameObject prefab;
+    public GameObject photonPlayerPrefab;
+    public GameObject photonBulletPrefab;
     private PhotonPlayer myPlayer;
-    private readonly Vector3 LEFT = new Vector3(-10, 0);
     private readonly Vector3 UP = new Vector3(0, 10);
-    private readonly Vector3 RIGHT = new Vector3(10, 0);
-    private readonly Vector3 DOWN = new Vector3(0, -10);
+
+    private const float DISTANCE_FROM_BODY = 60f;
+    private const float BULLET_SPEED = 6f;
 
     private void GameSetup()
     {
+        // UI Setup
         lobbyPanel.SetActive(false);
         gamePanel.SetActive(true);
+
+        // Chat Setup
+        chatController.Init();
+
         StartPhotonGame();
     }
 
     // Start is called before the first frame update
     private void StartPhotonGame()
     {
+        int point = PhotonNetwork.IsMasterClient ? 0 : 1;
+
         myPlayer = PhotonNetwork.Instantiate(
-            prefab.name,
-            spawnPoints[Random.Range(0, spawnPoints.Length)].position,
+            photonPlayerPrefab.name,
+            spawnPoints[point].position,
             Quaternion.identity,
             0)
             .GetComponent<PhotonPlayer>();
@@ -150,10 +163,33 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         myPlayer.transform.localPosition += UP;
     }
 
+    public void MoveDown()
+    {
+        myPlayer.transform.localPosition -= UP;
+    }
+
+    public void Fire()
+    {
+        Vector3 fireDirection = (PhotonNetwork.IsMasterClient ? Vector3.right : Vector3.left);
+
+        PhotonBulletBehaviour bullet = PhotonNetwork.Instantiate(
+            photonBulletPrefab.name,
+            myPlayer.transform.position + (fireDirection * DISTANCE_FROM_BODY),
+            Quaternion.identity,
+            0)
+            .GetComponent<PhotonBulletBehaviour>();
+
+        bullet.Init(fireDirection * BULLET_SPEED);
+    }
+
     public void EndPhotonGame()
     {
+        // UI DeInit
         gamePanel.SetActive(false);
         lobbyPanel.SetActive(true);
+
+        // Chat DeInit
+        chatController.DeInit();
 
         Logout();
     }
