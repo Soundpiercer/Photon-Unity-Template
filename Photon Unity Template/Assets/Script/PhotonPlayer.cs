@@ -25,7 +25,7 @@ public class PhotonPlayer : MonoBehaviour
 
         if (view.IsMine)
         {
-            cube.material.color = Color.yellow;
+            hpText.color = Color.yellow;
         }
     }
 
