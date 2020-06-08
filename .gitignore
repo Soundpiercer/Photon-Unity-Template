@@ -1,0 +1,11 @@
+*.sln
+*.csproj
+*.lock
+*.userprefs
+*.ide
+*.ide-wal
+*.ide-shm
+.vs
+Library/
+Temp/
+obj/
