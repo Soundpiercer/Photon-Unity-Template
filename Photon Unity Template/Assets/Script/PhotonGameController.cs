@@ -224,7 +224,8 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     public void MoveDown()
     {
-        myPlayer.transform.localPosition -= UP;
+        if (myPlayer.transform.localPosition.z >= UP.z)
+            myPlayer.transform.localPosition -= UP;
     }
 
     public void Fire()
