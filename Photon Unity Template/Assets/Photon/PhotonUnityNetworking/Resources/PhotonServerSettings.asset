@@ -36,6 +36,12 @@ MonoBehaviour:
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
+  - RPCDestroy
+  - RPCDisplaySynchronizationTime
+  - RPCMove
+  - RPCSetOccupied
+  - RPCSetUnOccupied
+  - RPCUpdateHP
   DisableAutoOpenWizard: 1
-  ShowSettings: 0
+  ShowSettings: 1
   DevRegionSetOnce: 0

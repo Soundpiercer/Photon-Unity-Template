@@ -6,8 +6,12 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 
+    /// <summary>
+    /// Photon Game Scene Controller.
+    /// </summary>
 public class PhotonGameController : MonoBehaviourPunCallbacks
 {
+        public PhotonView view;
     public PhotonChatController chatController;
 
     [Header("Panels")]
@@ -68,6 +72,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     public void Logout()
     {
+            view.RPC("RPCSetUnOccupied", RpcTarget.AllBuffered, myPlayer.id);
         PhotonNetwork.LeaveRoom();
         photonDetailText.text = string.Empty;
 
@@ -125,10 +130,14 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     #region Photon Game
     [Header("Photon Game")]
     public Transform[] spawnPoints;
+        public bool[] isOccupied;
     public GameObject photonPlayerPrefab;
     public GameObject photonBulletPrefab;
     private PhotonPlayer myPlayer;
     private readonly Vector3 UP = new Vector3(0, 10);
+
+        [Header("Game Panel")]
+        public Text synchronizationTimeText;
 
     private const float DISTANCE_FROM_BODY = 60f;
     private const float BULLET_SPEED = 6f;
@@ -142,21 +151,59 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         // Chat Setup
         chatController.Init();
 
-        StartPhotonGame();
-    }
+            // For Synchronization Latency Check
+            view.RPC("RPCDisplaySynchronizationTime", RpcTarget.AllBuffered, 0);
 
-    // Start is called before the first frame update
-    private void StartPhotonGame()
-    {
-        int point = PhotonNetwork.IsMasterClient ? 0 : 1;
+            // START!
+            StartPhotonGame();
+        }
 
-        myPlayer = PhotonNetwork.Instantiate(
-            photonPlayerPrefab.name,
-            spawnPoints[point].position,
-            Quaternion.identity,
-            0)
-            .GetComponent<PhotonPlayer>();
-    }
+        [PunRPC]
+        private void RPCDisplaySynchronizationTime(int dummy)
+        {
+            synchronizationTimeText.text = "Synchronized at : " + System.DateTime.Now.Ticks.ToString();
+        }
+
+        private void StartPhotonGame()
+        {
+            int id = SelectTransform();
+
+            myPlayer = PhotonNetwork.Instantiate(
+                photonPlayerPrefab.name,
+                spawnPoints[id].position,
+                Quaternion.identity,
+                0)
+                .GetComponent<PhotonPlayer>();
+
+            view.RPC("RPCSetOccupied", RpcTarget.AllBuffered, id);
+            myPlayer.id = id;
+        }
+
+        [PunRPC]
+        private void RPCSetOccupied(int id)
+        {
+            isOccupied[id] = true;
+        }
+
+        [PunRPC]
+        private void RPCSetUnOccupied(int id)
+        {
+            isOccupied[id] = false;
+        }
+
+        private int SelectTransform()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (isOccupied[0]) return 1;
+                else return 0;
+            }
+            else
+            {
+                if (isOccupied[1]) return 0;
+                else return 1;
+            }
+        }
 
     public void MoveUp()
     {
@@ -170,7 +217,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     public void Fire()
     {
-        Vector3 fireDirection = (PhotonNetwork.IsMasterClient ? Vector3.right : Vector3.left);
+            Vector3 fireDirection = (myPlayer.id == 0 ? Vector3.right : Vector3.left);
 
         PhotonBulletBehaviour bullet = PhotonNetwork.Instantiate(
             photonBulletPrefab.name,
