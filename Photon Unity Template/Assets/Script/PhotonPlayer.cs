@@ -6,6 +6,8 @@ using Photon.Realtime;
 public class PhotonPlayer : MonoBehaviour
 {
     public PhotonView view;
+    public Animator animator;
+
     public MeshRenderer cube;
     public TextMesh hpText;
 
@@ -14,6 +16,9 @@ public class PhotonPlayer : MonoBehaviour
 
     private const int HP_MAX = 100;
     private const string HP_STRING = " HP";
+
+    private const float ANIMATOR_SPEED = 1.25f;
+
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
 
     private readonly Vector3 STANDBY_POSITION = new Vector3(2000f, 2000f, 0);
@@ -27,6 +32,8 @@ public class PhotonPlayer : MonoBehaviour
         {
             hpText.color = Color.yellow;
         }
+
+        animator.speed = ANIMATOR_SPEED;
     }
 
     private void Update()
