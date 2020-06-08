@@ -55,6 +55,12 @@ public class PhotonPlayer : MonoBehaviour
         //gameObject.transform.localPosition += UP;
     }
 
+    public void GotDamaged(int damage)
+    {
+        hp -= damage;
+        animator.SetTrigger("Damaged");
+    }
+
     public void HasKilled()
     {
         gameObject.transform.position = STANDBY_POSITION;

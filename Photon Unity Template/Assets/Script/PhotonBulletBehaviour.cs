@@ -49,7 +49,6 @@ public class PhotonBulletBehaviour : MonoBehaviour
         }
     }
 
-
     // Self-destruct after lifespan
     private IEnumerator SelfDestructEnumerator()
     {
@@ -65,16 +64,17 @@ public class PhotonBulletBehaviour : MonoBehaviour
         if (player != null)
         {
             // enemy is killed when the HP becomes below 0.
-            player.hp -= DAMAGE;
+            player.GotDamaged(damage: DAMAGE);
+
             if (player.hp <= 0)
             {
                 player.HasKilled();
             }
         }
 
-        hasCollided = true;
+        //hasCollided = true;
 
-        if (!view.IsMine)
+        //if (!view.IsMine)
             view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
