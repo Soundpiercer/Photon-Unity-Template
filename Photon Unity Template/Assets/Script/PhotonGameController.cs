@@ -219,15 +219,9 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         }
     }
 
-    public void MoveUp()
+    public void Jump()
     {
-        myPlayer.transform.localPosition += UP;
-    }
-
-    public void MoveDown()
-    {
-        if (myPlayer.transform.localPosition.z >= UP.z)
-            myPlayer.transform.localPosition -= UP;
+        myPlayer.Jump();
     }
 
     public void Fire()

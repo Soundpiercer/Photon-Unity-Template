@@ -15,7 +15,9 @@ public class PhotonPlayer : MonoBehaviour
     private const int HP_MAX = 100;
     private const string HP_STRING = " HP";
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
+
     private readonly Vector3 STANDBY_POSITION = new Vector3(2000f, 2000f, 0);
+    private readonly Vector3 UP = new Vector3(0, 30f);
 
     private void Start()
     {
@@ -38,6 +40,11 @@ public class PhotonPlayer : MonoBehaviour
     private void RPCUpdateHP(int value)
     {
         hpText.text = value + HP_STRING;
+    }
+
+    public void Jump()
+    {
+        gameObject.transform.localPosition += UP;
     }
 
     public void HasKilled()
