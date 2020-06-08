@@ -106,6 +106,7 @@ MonoBehaviour:
   view: {fileID: 285267141527378229}
   cube: {fileID: 1195150669702359334}
   hpText: {fileID: 4653221111465928105}
+  id: 0
   hp: 0
 --- !u!54 &4178238791170025675
 Rigidbody:

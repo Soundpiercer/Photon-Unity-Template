@@ -1750,7 +1750,7 @@ MonoBehaviour:
   spawnPoints:
   - {fileID: 1325611806}
   - {fileID: 1355103343}
-  isOccupied: 
+  isOccupied: 0000
   photonPlayerPrefab: {fileID: 1558436499508454, guid: 61230534d2c574b239340278e8745278,
     type: 3}
   photonBulletPrefab: {fileID: 1558436499508454, guid: 0d8170034b34d7745aca33dc54a1f73b,
