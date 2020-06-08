@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 using Photon.Pun;
 using Photon.Realtime;
@@ -24,6 +25,7 @@ public class PhotonPlayer : MonoBehaviour
     private const string HP_STRING = " HP";
 
     private const float ANIMATOR_SPEED = 1.25f;
+    private const float INVINCIBLE_TIME_WHILE_DAMAGED = 2.5f;
 
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
 
@@ -79,6 +81,15 @@ public class PhotonPlayer : MonoBehaviour
 
         audioSource.clip = damageVoice[Random.Range(0, jumpVoice.Length)];
         audioSource.Play();
+
+        StartCoroutine(MakePlayerInvincibleEnumerator(INVINCIBLE_TIME_WHILE_DAMAGED));
+    }
+
+    private IEnumerator MakePlayerInvincibleEnumerator(float time)
+    {
+        GetComponent<Collider>().enabled = false;
+        yield return new WaitForSeconds(time);
+        GetComponent<Collider>().enabled = true;
     }
 
     public void HasKilled()
