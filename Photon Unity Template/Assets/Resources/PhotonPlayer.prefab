@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4178238791170025675}
   - component: {fileID: 8798861758747372039}
   m_Layer: 0
-  m_Name: PhotonAvatar
+  m_Name: PhotonPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
