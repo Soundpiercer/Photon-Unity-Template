@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   view: {fileID: 285267141527378229}
-  cube: {fileID: 4527018747592660524}
+  sphere: {fileID: 4527018747592660524}
   velocity: {x: 0, y: 0, z: 0}
 --- !u!54 &4178238791170025675
 Rigidbody:

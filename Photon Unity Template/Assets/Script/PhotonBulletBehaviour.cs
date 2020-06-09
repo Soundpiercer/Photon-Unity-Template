@@ -9,10 +9,8 @@ using Photon.Realtime;
 public class PhotonBulletBehaviour : MonoBehaviour
 {
     public PhotonView view;
-    public MeshRenderer cube;
+    public MeshRenderer sphere;
     public Vector3 velocity;
-
-    private bool hasCollided;
 
     private const float LIFESPAN = 8f;
     private const int DAMAGE = 10;
@@ -22,7 +20,7 @@ public class PhotonBulletBehaviour : MonoBehaviour
 
     private void Start()
     {
-        cube.material.color = Color.red;
+        sphere.material.color = Color.red;
     }
 
     public void Init(Vector3 velocity)
@@ -31,6 +29,13 @@ public class PhotonBulletBehaviour : MonoBehaviour
 
         StartCoroutine(SelfDestructEnumerator());
         view.RPC(RPC_MOVE_METHOD_NAME, RpcTarget.AllBuffered, 0);
+    }
+
+    // Self-destruct after lifespan
+    private IEnumerator SelfDestructEnumerator()
+    {
+        yield return new WaitForSeconds(LIFESPAN);
+        view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
     [PunRPC]
@@ -42,18 +47,11 @@ public class PhotonBulletBehaviour : MonoBehaviour
     // Physical movements
     private IEnumerator MoveEnumerator()
     {
-        while (!hasCollided)
+        while (true)
         {
             gameObject.transform.position += velocity;
             yield return null;
         }
-    }
-
-    // Self-destruct after lifespan
-    private IEnumerator SelfDestructEnumerator()
-    {
-        yield return new WaitForSeconds(LIFESPAN);
-        view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
     // The player hits the enemy on collision.
@@ -72,10 +70,14 @@ public class PhotonBulletBehaviour : MonoBehaviour
             }
         }
 
-        //hasCollided = true;
-
-        //if (!view.IsMine)
+        if (view.IsMine)
+        {
+            gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        }
+        else
+        {
             view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
+        }
     }
 
     /// <summary>
@@ -86,5 +88,4 @@ public class PhotonBulletBehaviour : MonoBehaviour
     {
         Destroy(gameObject);
     }
-
 }

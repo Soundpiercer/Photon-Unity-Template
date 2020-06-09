@@ -15,7 +15,6 @@ public class PhotonPlayer : MonoBehaviour
     public AudioClip[] damageVoice;
     public AudioClip killedVoice;
 
-    public MeshRenderer cube;
     public TextMesh hpText;
 
     public int id;
@@ -24,29 +23,29 @@ public class PhotonPlayer : MonoBehaviour
     private const int HP_MAX = 100;
     private const string HP_STRING = " HP";
 
-    private const float ANIMATOR_SPEED = 1.25f;
-    private const float INVINCIBLE_TIME_WHILE_DAMAGED = 2.5f;
+    private const float ANIMATOR_SPEED = 1.5f;
+    private const float INVINCIBLE_TIME_WHILE_DAMAGED = 3.125f / ANIMATOR_SPEED;
 
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
 
     private readonly Vector3 STANDBY_POSITION = new Vector3(2000f, 2000f, 0);
-    private readonly Vector3 UP = new Vector3(0, 30f);
 
     private void Start()
     {
+        animator.speed = ANIMATOR_SPEED;
         hp = HP_MAX;
 
+        // Changes the HP Text Color to yellow to identify which player is mine.
         if (view.IsMine)
         {
             hpText.color = Color.yellow;
         }
 
-        animator.speed = ANIMATOR_SPEED;
-
         audioSource.clip = initVoice;
         audioSource.Play();
     }
 
+    // @ TODO : Update 메서드 부하가 센데 빼버릴수 없나?
     private void Update()
     {
         // Send and synchronizes my player's status to all players.
@@ -82,10 +81,10 @@ public class PhotonPlayer : MonoBehaviour
         audioSource.clip = damageVoice[Random.Range(0, jumpVoice.Length)];
         audioSource.Play();
 
-        StartCoroutine(MakePlayerInvincibleEnumerator(INVINCIBLE_TIME_WHILE_DAMAGED));
+        StartCoroutine(MakePlayerInvincibleWhilePlayingAnimationEnumerator(INVINCIBLE_TIME_WHILE_DAMAGED));
     }
 
-    private IEnumerator MakePlayerInvincibleEnumerator(float time)
+    private IEnumerator MakePlayerInvincibleWhilePlayingAnimationEnumerator(float time)
     {
         GetComponent<Collider>().enabled = false;
         yield return new WaitForSeconds(time);
