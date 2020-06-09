@@ -143,13 +143,15 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public GameObject photonPlayerPrefab;
     public GameObject photonBulletPrefab;
     private PhotonPlayer myPlayer;
-    private readonly Vector3 UP = new Vector3(0, 10);
-
+    
     [Header("Game Panel")]
     public Text synchronizationTimeText;
 
-    private const float DISTANCE_FROM_BODY = 60f;
-    private const float BULLET_SPEED = 6f;
+    private const float X_DISTANCE_FROM_BODY = 24f;
+    private const float BULLET_SPEED = 10f;
+
+    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
+    private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 135f);
 
     private void GameSetup()
     {
@@ -176,11 +178,13 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private void StartPhotonGame()
     {
         int id = SelectTransform();
+        bool isBackwards = id != 0;
 
+        // instantiate the player with position and rotation specified.
         myPlayer = PhotonNetwork.Instantiate(
             photonPlayerPrefab.name,
             spawnPoints[id].position,
-            Quaternion.identity,
+            isBackwards ? QUATERNION_BACKWARDS : Quaternion.identity,
             0)
             .GetComponent<PhotonPlayer>();
 
@@ -215,23 +219,19 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         }
     }
 
-    public void MoveUp()
+    public void Jump()
     {
-        myPlayer.transform.localPosition += UP;
-    }
-
-    public void MoveDown()
-    {
-        myPlayer.transform.localPosition -= UP;
+        myPlayer.Jump();
     }
 
     public void Fire()
     {
+        myPlayer.Fire();
         Vector3 fireDirection = (myPlayer.id == 0 ? Vector3.right : Vector3.left);
 
         PhotonBulletBehaviour bullet = PhotonNetwork.Instantiate(
             photonBulletPrefab.name,
-            myPlayer.transform.position + (fireDirection * DISTANCE_FROM_BODY),
+            myPlayer.transform.position + (fireDirection * X_DISTANCE_FROM_BODY) + Y_DISTANCE_FROM_GROUND,
             Quaternion.identity,
             0)
             .GetComponent<PhotonBulletBehaviour>();
