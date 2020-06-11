@@ -18,6 +18,16 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     private const string PHOTON_CHAT_ID = ""; // must be defined
     private const string DEFAULT_CHANNEL_NAME = "channel01";
 
+    private void Awake()
+    {
+        // Text Filtering System - Init Text Checker 
+        TextAsset textAsset = Resources.Load<TextAsset>("CensoredWords");
+        if (textAsset != null)
+        {
+            TextChecker.Init(textAsset);
+        }
+    }
+
     public void Init()
     {
         StartCoroutine(InitEnumerator());
@@ -140,7 +150,15 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
 
     public void Send()
     {
-        chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "\nMessage from " + playerName + " : " + messageInputField.text);
+        if (TextChecker.Check(messageInputField.text, TextCheckMode.Chat))
+        {
+            chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "<color=yellow>" + playerName + " : ***CENSORED!!!***</color>");
+        }
+        else
+        {
+            chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "\nMessage from " + playerName + " : " + messageInputField.text);
+        }
+
         messageInputField.text = string.Empty;
     }
 

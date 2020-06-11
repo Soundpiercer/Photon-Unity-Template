@@ -21,6 +21,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     [Header("Lobby Panel")]
     public Text photonStatusText;
     public Text photonDetailText;
+    public Text fpsText;
     public GameObject quickStartButton;
     public GameObject logoutButton;
 
@@ -37,6 +38,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        Application.targetFrameRate = 60;
         PhotonNetworkManager.Instance.Init(
             onInitSuccess: region =>
             {
@@ -46,6 +48,11 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
                 quickStartButton.SetActive(true);
                 StartCoroutine(DisplayRoomNumberEnumerator());
             });
+    }
+
+    private void Update()
+    {
+        fpsText.text = "FPS : " + System.Math.Round((1 / Time.deltaTime), 4);
     }
 
     private IEnumerator DisplayRoomNumberEnumerator()
