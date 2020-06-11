@@ -106,21 +106,35 @@ public class TextChecker
     {
         string loweredText = text.ToLower(); // is not case-specific
 
-        if (string.IsNullOrEmpty(loweredText))
+        if (mode == TextCheckMode.Chat)
         {
-            return true;
+            if (hasCensoredWords(loweredText, mode))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
-        else if (hasCensoredWords(loweredText, mode))
+        else // TextCheckMode.Nickname
         {
-            return true;
-        }
-        else if (IsRegExError(loweredText))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
+            if (string.IsNullOrEmpty(loweredText))
+            {
+                return true;
+            }
+            else if (hasCensoredWords(loweredText, mode))
+            {
+                return true;
+            }
+            else if (IsRegExError(loweredText))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
@@ -134,21 +148,35 @@ public class TextChecker
     {
         string loweredText = text.ToLower(); // is not case-specific
 
-        if (string.IsNullOrEmpty(loweredText))
+        if (mode == TextCheckMode.Chat)
         {
-            callBack(TextCheckResult.Invalid_Length);
+            if (hasCensoredWords(loweredText, mode))
+            {
+                callBack(TextCheckResult.Invalid_Censored);
+            }
+            else
+            {
+                callBack(TextCheckResult.Valid);
+            }
         }
-        else if (hasCensoredWords(loweredText, mode))
+        else // TextCheckMode.Nickname
         {
-            callBack(TextCheckResult.Invalid_Censored);
-        }
-        else if (IsRegExError(loweredText))
-        {
-            callBack(TextCheckResult.Invalid_RegEx);
-        }
-        else
-        {
-            callBack(TextCheckResult.Valid);
+            if (string.IsNullOrEmpty(loweredText))
+            {
+                callBack(TextCheckResult.Invalid_Length);
+            }
+            else if (hasCensoredWords(loweredText, mode))
+            {
+                callBack(TextCheckResult.Invalid_Censored);
+            }
+            else if (IsRegExError(loweredText))
+            {
+                callBack(TextCheckResult.Invalid_RegEx);
+            }
+            else
+            {
+                callBack(TextCheckResult.Valid);
+            }
         }
     }
 

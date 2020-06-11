@@ -36,7 +36,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     // Initializes Photon Chat Synchronously
     private IEnumerator InitEnumerator()
     {
-        playerName = GetPlayerName();
+        playerName = GetNewPlayerName();
 
         chatClient = new ChatClient(this);
         StartCoroutine(ServiceEnumerator());
@@ -45,7 +45,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         Debug.Log("<b>[Photon Chat Controller] >>>>>> Photon Chat Init Success!</b>");
     }
 
-    private string GetPlayerName()
+    private string GetNewPlayerName()
     {
         return Guid.NewGuid().ToString();
     }
@@ -116,11 +116,17 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         chatText.text += "\n" + user + "left the chat";
     }
 
+    /// <summary>
+    /// This method is called when someone posts the message to Photon Chat.
+    /// </summary>
+    /// <param name="channelName"></param>
+    /// <param name="senders"></param>
+    /// <param name="messages"></param>
     public void OnGetMessages(string channelName, string[] senders, object[] messages)
     {
         for (int i = 0; i < messages.Length; i++)
         {
-            chatText.text += "\n" + (string.Format("{0} : {1}", senders[i], messages[i].ToString()));
+            chatText.text += "\n" + (string.Format("{0} : {1}", /*senders[i]*/playerName, messages[i].ToString()));
         }
     }
 
@@ -148,18 +154,50 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     }
     #endregion
 
-    public void Send()
+    /// <summary>
+    /// Button Logic that sends message to Photon Chat
+    /// </summary>
+    public void SendMessage()
     {
         if (TextChecker.Check(messageInputField.text, TextCheckMode.Chat))
         {
-            chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "<color=yellow>" + playerName + " : ***CENSORED!!!***</color>");
+            chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "<color=red>Post Failed : ***CENSORED!!!***</color>");
         }
         else
         {
-            chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "\nMessage from " + playerName + " : " + messageInputField.text);
+            chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, messageInputField.text);
         }
 
         messageInputField.text = string.Empty;
+    }
+
+    /// <summary>
+    /// Button Logic that sets player name
+    /// </summary>
+    public void SetName()
+    {
+        TextChecker.CheckWithCallback(messageInputField.text, TextCheckMode.Nickname,
+            checkResult =>
+            {
+                switch (checkResult)
+                {
+                    case TextCheckResult.Invalid_Censored:
+                        chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "<color=red>Player Name Change Failed : ***CENSORED!!!***</color>");
+                        break;
+                    case TextCheckResult.Invalid_Length:
+                        chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "<color=red>Player Name Change Failed : Name is EMPTY!</color>");
+                        break;
+                    case TextCheckResult.Invalid_RegEx:
+                        chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "<color=red>Player Name Change Failed : Only Alphabet, Korean, Numbers are allowed!</color>");
+                        break;
+                    case TextCheckResult.Valid:
+                    default:
+                        chatClient.PublishMessage(DEFAULT_CHANNEL_NAME, "<color=yellow>Player Name Change Success : " + playerName + " -> " + messageInputField.text + "</color>");
+                        playerName = messageInputField.text;
+                        break;
+                }
+            }
+            );
     }
 
     public void DeInit()
