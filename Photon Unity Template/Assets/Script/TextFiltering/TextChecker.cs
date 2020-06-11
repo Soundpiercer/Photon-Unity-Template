@@ -74,7 +74,9 @@ public class TextChecker
         censoredWordsTrie = new Trie();
 
         // 2. Parse CSVs.
-        List<CensoredWord> censoredWordList = CSVParser.Convert<CensoredWord>(censoredWordsCSVDataString);
+        List<CensoredWord> censoredWordList = new List<CensoredWord>
+        { new CensoredWord("fuck"), new CensoredWord("shit") };
+        //CSVParser.Convert<CensoredWord>(censoredWordsCSVDataString);
         //List<ExceptionWord> exceptionList = CSVParser.Convert<ExceptionWord>(exceptionWordsCSVDataString);
 
         // @ TODO : exception logic should be improved
