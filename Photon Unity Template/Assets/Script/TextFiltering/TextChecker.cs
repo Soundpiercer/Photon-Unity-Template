@@ -38,12 +38,12 @@ public class TextChecker
     /// <summary>
     /// Data that extracted from the CensoredWord CSV.
     /// </summary>
-    public static string censoredWordsCSVDataString;
+    private static string censoredWordsCSVDataString;
 
     /// <summary>
     /// Data that extracted from the ExceptionWord CSV.
     /// </summary>
-    public static string exceptionWordsCSVDataString;
+    //public static string exceptionWordsCSVDataString;
 
     /// <summary>
     /// Censored words container.
@@ -62,21 +62,27 @@ public class TextChecker
         }
     }
 
-    public static void BuildTrieFromCSV()
+    public static void Init(TextAsset textAsset)
+    {
+        censoredWordsCSVDataString = textAsset.text;
+        BuildTrieFromCSV();
+    }
+
+    private static void BuildTrieFromCSV()
     {
         // 1. Trie Init
         censoredWordsTrie = new Trie();
 
         // 2. Parse CSVs.
-        List<CensoredWord> censorChatList = CSVParser.Convert<CensoredWord>(censoredWordsCSVDataString);
-        List<ExceptionWord> exceptionList = CSVParser.Convert<ExceptionWord>(exceptionWordsCSVDataString);
+        List<CensoredWord> censoredWordList = CSVParser.Convert<CensoredWord>(censoredWordsCSVDataString);
+        //List<ExceptionWord> exceptionList = CSVParser.Convert<ExceptionWord>(exceptionWordsCSVDataString);
 
         // @ TODO : exception logic should be improved
         // 3. Discards exception words from the censoredwords list.
-        IEnumerable<string> censoredWordsQuery = from s in censorChatList select s.Key;
-        IEnumerable<string> exceptionWordsQuery = from s in exceptionList select s.Key;
+        IEnumerable<string> censoredWordsQuery = from s in censoredWordList select s.Key;
+        //IEnumerable<string> exceptionWordsQuery = from s in exceptionList select s.Key;
 
-        censoredWordsQuery = censoredWordsQuery.Except(exceptionWordsQuery);
+        //censoredWordsQuery = censoredWordsQuery.Except(exceptionWordsQuery);
 
         // 4. Add to Trie
         foreach (string word in censoredWordsQuery)
