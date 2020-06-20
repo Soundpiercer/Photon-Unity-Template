@@ -227,19 +227,11 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public void Fire()
     {
         myPlayer.Fire();
+    }
 
-        /*
-        Vector3 fireDirection = (myPlayer.id == 0 ? Vector3.right : Vector3.left);
-
-        PhotonBulletBehaviour bullet = PhotonNetwork.Instantiate(
-            photonBulletPrefab.name,
-            myPlayer.transform.position + (fireDirection * X_DISTANCE_FROM_BODY) + Y_DISTANCE_FROM_GROUND,
-            Quaternion.identity,
-            0)
-            .GetComponent<PhotonBulletBehaviour>();
-
-        bullet.Init(fireDirection * BULLET_SPEED);
-        */
+    public void Duck()
+    {
+        myPlayer.Duck();
     }
 
     public void EndPhotonGame()

@@ -36,8 +36,10 @@ public class PhotonPlayer : MonoBehaviour
     // Model
     private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
     private const float ANIMATOR_SPEED = 1.5f;
-    private const float INVINCIBLE_TIME_WHILE_DAMAGED = 3.125f / ANIMATOR_SPEED;
     private readonly Vector3 STANDBY_POSITION = new Vector3(2000f, 2000f, 0);
+
+    private const float INVINCIBLE_TIME_WHILE_DUCKING = 1.5f / ANIMATOR_SPEED;
+    private const float INVINCIBLE_TIME_WHILE_DAMAGED = 3.125f / ANIMATOR_SPEED;
 
     // Bullet
     private const float BULLET_INIT_DISTANCE_X_FROM_MODEL = 24f;
@@ -48,6 +50,7 @@ public class PhotonPlayer : MonoBehaviour
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
     private const string RPC_JUMP_METHOD_NAME = "RPCJump";
     private const string RPC_FIRE_METHOD_NAME = "RPCFire";
+    private const string RPC_DUCK_METHOD_NAME = "RPCDuck";
     #endregion
 
     private void Start()
@@ -123,6 +126,22 @@ public class PhotonPlayer : MonoBehaviour
             .GetComponent<PhotonBulletBehaviour>();
 
         bullet.Init(fireDirection * BULLET_SPEED);
+    }
+
+    public void Duck()
+    {
+        view.RPC(RPC_DUCK_METHOD_NAME, RpcTarget.AllBuffered, 0);
+    }
+
+    [PunRPC]
+    private void RPCDuck(int dummy)
+    {
+        animator.SetTrigger("Duck");
+
+        audioSource.clip = jumpVoice[Random.Range(0, jumpVoice.Length)];
+        audioSource.Play();
+
+        StartCoroutine(MakePlayerInvincibleWhilePlayingAnimationEnumerator(INVINCIBLE_TIME_WHILE_DUCKING));
     }
 
     public void GotDamaged(int damage)
