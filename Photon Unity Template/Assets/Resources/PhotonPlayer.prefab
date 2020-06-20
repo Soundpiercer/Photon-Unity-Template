@@ -119,6 +119,8 @@ MonoBehaviour:
   hpText: {fileID: 4653221111465928105}
   id: 0
   hp: 0
+  photonBulletPrefab: {fileID: 1558436499508454, guid: 0d8170034b34d7745aca33dc54a1f73b,
+    type: 3}
 --- !u!54 &4178238791170025675
 Rigidbody:
   m_ObjectHideFlags: 0
