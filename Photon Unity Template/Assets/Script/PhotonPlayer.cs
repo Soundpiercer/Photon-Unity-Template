@@ -104,15 +104,16 @@ public class PhotonPlayer : MonoBehaviour
     public void Fire()
     {
         view.RPC(RPC_FIRE_METHOD_NAME, RpcTarget.AllBuffered, 0);
-
-        audioSource.clip = fireVoice;
-        audioSource.Play();
     }
 
-   
     [PunRPC]
     private void RPCFire(int dummy)
     {
+        animator.SetTrigger("Fire");
+
+        audioSource.clip = fireVoice;
+        audioSource.Play();
+
         Vector3 fireDirection = id == 0 ? Vector3.right : Vector3.left;
 
         PhotonBulletBehaviour bullet = Instantiate(
