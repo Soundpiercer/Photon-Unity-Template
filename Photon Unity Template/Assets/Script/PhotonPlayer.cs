@@ -8,6 +8,7 @@ public class PhotonPlayer : MonoBehaviour
 {
     public PhotonView view;
     public int id;
+    public bool hasKilled;
 
     [Header("HP")]
     public int hp;
@@ -106,6 +107,9 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Fire()
     {
+        if (hasKilled)
+            return;
+
         view.RPC(RPC_FIRE_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
@@ -164,6 +168,7 @@ public class PhotonPlayer : MonoBehaviour
 
     public void HasKilled()
     {
+        hasKilled = true;
         gameObject.transform.position = STANDBY_POSITION;
 
         audioSource.clip = killedVoice;
