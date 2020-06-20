@@ -8,7 +8,7 @@ using Photon.Realtime;
 
 public class PhotonBulletBehaviour : MonoBehaviour
 {
-    public PhotonView view;
+    //public PhotonView view;
     public MeshRenderer sphere;
     public Vector3 velocity;
 
@@ -28,16 +28,22 @@ public class PhotonBulletBehaviour : MonoBehaviour
         this.velocity = velocity;
 
         StartCoroutine(SelfDestructEnumerator());
-        view.RPC(RPC_MOVE_METHOD_NAME, RpcTarget.AllBuffered, 0);
+        //view.RPC(RPC_MOVE_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
     // Self-destruct after lifespan
     private IEnumerator SelfDestructEnumerator()
     {
         yield return new WaitForSeconds(LIFESPAN);
-        view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
+        //view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
+    private void FixedUpdate()
+    {
+        gameObject.transform.position += velocity;
+    }
+
+    /*
     [PunRPC]
     private void RPCMove(int dummy)
     {
@@ -50,9 +56,12 @@ public class PhotonBulletBehaviour : MonoBehaviour
         while (true)
         {
             gameObject.transform.position += velocity;
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
     }
+    */
+
+    public GameObject explosionPrefab;
 
     // The player hits the enemy on collision.
     private void OnCollisionEnter(Collision collision)
@@ -64,12 +73,16 @@ public class PhotonBulletBehaviour : MonoBehaviour
             // enemy is killed when the HP becomes below 0.
             player.GotDamaged(damage: DAMAGE);
 
+            TraumaInducer explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity).GetComponent<TraumaInducer>();
+            explosion.PlayExplosion();
+
             if (player.hp <= 0)
             {
                 player.HasKilled();
             }
         }
 
+        /*
         if (view.IsMine)
         {
             gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -78,12 +91,12 @@ public class PhotonBulletBehaviour : MonoBehaviour
         {
             view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
         }
+        */
 
-        TraumaInducer explosion = GameObject.Find("BigExplosion").GetComponent<TraumaInducer>();
-        explosion.transform.position = gameObject.transform.position;
-        StartCoroutine(explosion.StartEnumerator());
+        Destroy(gameObject);
     }
 
+    /*
     /// <summary>
     /// Display gameObject Destroy() via Pun RPC.
     /// </summary>
@@ -92,4 +105,5 @@ public class PhotonBulletBehaviour : MonoBehaviour
     {
         Destroy(gameObject);
     }
+    */
 }

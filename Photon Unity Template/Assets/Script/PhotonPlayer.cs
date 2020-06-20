@@ -46,7 +46,7 @@ public class PhotonPlayer : MonoBehaviour
     }
 
     // @ TODO : Update 메서드 부하가 센데 빼버릴수 없나?
-    private void Update()
+    private void FixedUpdate()
     {
         // Send and synchronizes my player's status to all players.
         if (view.IsMine)
@@ -61,16 +61,46 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Jump()
     {
-        animator.SetTrigger("Jump");
+        view.RPC("RPCJump", RpcTarget.AllBuffered, 0);
 
         audioSource.clip = jumpVoice[Random.Range(0, jumpVoice.Length)];
         audioSource.Play();
     }
 
+    [PunRPC]
+    private void RPCJump(int dummy)
+    {
+        animator.SetTrigger("Jump");
+    }
+
     public void Fire()
     {
+        view.RPC("RPCFire", RpcTarget.AllBuffered, 0);
+
         audioSource.clip = fireVoice;
         audioSource.Play();
+    }
+
+    private const float X_DISTANCE_FROM_BODY = 240f;
+    private const float BULLET_SPEED = -10f;
+
+    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
+    private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 135f);
+
+    public GameObject photonBulletPrefab;
+
+    [PunRPC]
+    private void RPCFire(int dummy)
+    {
+        Vector3 fireDirection = id == 0 ? Vector3.right : Vector3.left;
+
+        PhotonBulletBehaviour bullet = Instantiate(
+            photonBulletPrefab,
+            transform.position + (fireDirection * X_DISTANCE_FROM_BODY) + Y_DISTANCE_FROM_GROUND,
+            Quaternion.identity)
+            .GetComponent<PhotonBulletBehaviour>();
+
+        bullet.Init(fireDirection * BULLET_SPEED);
     }
 
     public void GotDamaged(int damage)

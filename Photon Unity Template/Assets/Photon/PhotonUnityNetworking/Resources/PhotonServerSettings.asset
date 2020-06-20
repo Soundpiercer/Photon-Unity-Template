@@ -36,9 +36,9 @@ MonoBehaviour:
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
-  - RPCDestroy
   - RPCDisplaySynchronizationTime
-  - RPCMove
+  - RPCFire
+  - RPCJump
   - RPCSetOccupied
   - RPCSetUnOccupied
   - RPCUpdateHP
