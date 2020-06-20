@@ -78,6 +78,10 @@ public class PhotonBulletBehaviour : MonoBehaviour
         {
             view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
         }
+
+        TraumaInducer explosion = GameObject.Find("BigExplosion").GetComponent<TraumaInducer>();
+        explosion.transform.position = gameObject.transform.position;
+        StartCoroutine(explosion.StartEnumerator());
     }
 
     /// <summary>

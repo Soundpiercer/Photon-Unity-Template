@@ -11,7 +11,7 @@ public class TraumaInducer : MonoBehaviour
     [Tooltip("Maximum distance in which objects are affected by this TraumaInducer")]
     public float Range = 45;
 
-    private IEnumerator Start()
+    public IEnumerator StartEnumerator()
     {
         /* Wait for the specified delay */
         yield return new WaitForSeconds(Delay);
