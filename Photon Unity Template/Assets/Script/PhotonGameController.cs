@@ -53,6 +53,12 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private void Update()
     {
         fpsText.text = "FPS : " + System.Math.Round((1 / Time.deltaTime), 4);
+
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.X)) Fire();
+        if (Input.GetKeyDown(KeyCode.C)) Jump();
+        if (Input.GetKeyDown(KeyCode.V)) Duck();
+#endif
     }
 
     private IEnumerator DisplayRoomNumberEnumerator()
