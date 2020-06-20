@@ -50,7 +50,7 @@ public class PhotonBulletBehaviour : MonoBehaviour
         while (true)
         {
             gameObject.transform.position += velocity;
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
     }
 

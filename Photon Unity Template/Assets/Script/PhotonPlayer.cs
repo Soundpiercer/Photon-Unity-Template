@@ -46,7 +46,7 @@ public class PhotonPlayer : MonoBehaviour
     }
 
     // @ TODO : Update 메서드 부하가 센데 빼버릴수 없나?
-    private void Update()
+    private void FixedUpdate()
     {
         // Send and synchronizes my player's status to all players.
         if (view.IsMine)
