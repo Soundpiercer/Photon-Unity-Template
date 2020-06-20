@@ -35,7 +35,7 @@ public class PhotonPlayer : MonoBehaviour
     private const string HP_STRING = " HP";
 
     // Model
-    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
+    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, -90f, 0);
     private const float ANIMATOR_SPEED = 1.5f;
     private readonly Vector3 STANDBY_POSITION = new Vector3(2000f, 2000f, 0);
 
@@ -135,18 +135,18 @@ public class PhotonPlayer : MonoBehaviour
         if (hasKilled)
             return;
 
-        view.RPC(RPC_FIRE_METHOD_NAME, RpcTarget.AllBuffered, 0);
+        view.RPC(RPC_FIRE_METHOD_NAME, RpcTarget.AllBuffered, id);
     }
 
     [PunRPC]
-    private void RPCFire(int dummy)
+    private void RPCFire(int attackerId)
     {
         animator.SetTrigger("Fire");
 
         audioSource.clip = fireVoice;
         audioSource.Play();
 
-        Vector3 fireDirection = id == 0 ? Vector3.right : Vector3.left;
+        Vector3 fireDirection = attackerId == 0 ? Vector3.right : Vector3.left;
 
         PhotonBulletBehaviour bullet = Instantiate(
             photonBulletPrefab,
