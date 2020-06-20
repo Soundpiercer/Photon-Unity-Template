@@ -7,7 +7,20 @@ using Photon.Realtime;
 public class PhotonPlayer : MonoBehaviour
 {
     public PhotonView view;
+    public int id;
+
+    [Header("HP")]
+    public int hp;
+    public TextMesh hpText;
+
+    [Header("Unity-chan! Model")]
+    public GameObject model;
     public Animator animator;
+
+    [Header("Bullet")]
+    public GameObject photonBulletPrefab;
+
+    [Header("Audio Source")]
     public AudioSource audioSource;
     public AudioClip initVoice;
     public AudioClip[] jumpVoice;
@@ -15,34 +28,49 @@ public class PhotonPlayer : MonoBehaviour
     public AudioClip[] damageVoice;
     public AudioClip killedVoice;
 
-    public TextMesh hpText;
-
-    public int id;
-    public int hp;
-
+    #region CONSTANT
+    // HP
     private const int HP_MAX = 100;
     private const string HP_STRING = " HP";
 
+    // Model
+    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
     private const float ANIMATOR_SPEED = 1.5f;
     private const float INVINCIBLE_TIME_WHILE_DAMAGED = 3.125f / ANIMATOR_SPEED;
-
-    private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
-
     private readonly Vector3 STANDBY_POSITION = new Vector3(2000f, 2000f, 0);
+
+    // Bullet
+    private const float BULLET_INIT_DISTANCE_X_FROM_MODEL = 24f;
+    private const float BULLET_SPEED = 10f;
+    private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 135f);
+
+    // RPC
+    private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
+    private const string RPC_JUMP_METHOD_NAME = "RPCJump";
+    private const string RPC_FIRE_METHOD_NAME = "RPCFire";
+    #endregion
 
     private void Start()
     {
-        animator.speed = ANIMATOR_SPEED;
         hp = HP_MAX;
-
-        // Changes the HP Text Color to yellow to identify which player is mine.
-        if (view.IsMine)
+        if (view.IsMine) // Changes the HP Text Color to yellow to identify which player is mine.
         {
             hpText.color = Color.yellow;
         }
 
+        animator.speed = ANIMATOR_SPEED;
+
         audioSource.clip = initVoice;
         audioSource.Play();
+    }
+
+    public void Init(int id)
+    {
+        this.id = id;
+        if (id != 0)
+        {
+            model.transform.rotation = QUATERNION_BACKWARDS;
+        }
     }
 
     // @ TODO : Update 메서드 부하가 센데 빼버릴수 없나?
@@ -61,7 +89,7 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Jump()
     {
-        view.RPC("RPCJump", RpcTarget.AllBuffered, 0);
+        view.RPC(RPC_JUMP_METHOD_NAME, RpcTarget.AllBuffered, 0);
 
         audioSource.clip = jumpVoice[Random.Range(0, jumpVoice.Length)];
         audioSource.Play();
@@ -75,20 +103,13 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Fire()
     {
-        view.RPC("RPCFire", RpcTarget.AllBuffered, 0);
+        view.RPC(RPC_FIRE_METHOD_NAME, RpcTarget.AllBuffered, 0);
 
         audioSource.clip = fireVoice;
         audioSource.Play();
     }
 
-    private const float X_DISTANCE_FROM_BODY = 240f;
-    private const float BULLET_SPEED = -10f;
-
-    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
-    private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 135f);
-
-    public GameObject photonBulletPrefab;
-
+   
     [PunRPC]
     private void RPCFire(int dummy)
     {
@@ -96,7 +117,7 @@ public class PhotonPlayer : MonoBehaviour
 
         PhotonBulletBehaviour bullet = Instantiate(
             photonBulletPrefab,
-            transform.position + (fireDirection * X_DISTANCE_FROM_BODY) + Y_DISTANCE_FROM_GROUND,
+            transform.position + (fireDirection * BULLET_INIT_DISTANCE_X_FROM_MODEL) + BULLET_INIT_DISTANCE_Y_FROM_GROUND,
             Quaternion.identity)
             .GetComponent<PhotonBulletBehaviour>();
 

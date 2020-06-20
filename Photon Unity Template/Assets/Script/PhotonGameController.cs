@@ -145,20 +145,14 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     #region Photon Game
     [Header("Photon Game")]
+    public GameObject photonPlayerPrefab;
     public Transform[] spawnPoints;
     public bool[] isOccupied;
-    public GameObject photonPlayerPrefab;
-    public GameObject photonBulletPrefab;
+
     private PhotonPlayer myPlayer;
     
     [Header("Game Panel")]
     public Text synchronizationTimeText;
-
-    private const float X_DISTANCE_FROM_BODY = 24f;
-    private const float BULLET_SPEED = 10f;
-
-    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
-    private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 135f);
 
     private void GameSetup()
     {
@@ -184,20 +178,19 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     private void StartPhotonGame()
     {
-        int id = SelectTransform();
-        bool isBackwards = id != 0;
+        int id = GetVacantSlotID();
 
         // instantiate the player with position and rotation specified.
         myPlayer = PhotonNetwork.Instantiate(
             photonPlayerPrefab.name,
             spawnPoints[id].position,
-            isBackwards ? QUATERNION_BACKWARDS : Quaternion.identity,
+            Quaternion.identity,
             0)
             .GetComponent<PhotonPlayer>();
+        myPlayer.Init(id);
 
         // notice to all players that my player's spawn point is now occupied
         view.RPC(RPC_SET_OCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, id);
-        myPlayer.id = id;
     }
 
     [PunRPC]
@@ -212,7 +205,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         isOccupied[id] = false;
     }
 
-    private int SelectTransform()
+    private int GetVacantSlotID()
     {
         if (PhotonNetwork.IsMasterClient)
         {
