@@ -48,6 +48,7 @@ public class PhotonPlayer : MonoBehaviour
     private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 128f);
 
     // RPC
+    private const string RPC_SET_PLAYER_ROTATION_METHOD_NAME = "RPCSetPlayerRotation";
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
     private const string RPC_JUMP_METHOD_NAME = "RPCJump";
     private const string RPC_FIRE_METHOD_NAME = "RPCFire";
@@ -71,6 +72,12 @@ public class PhotonPlayer : MonoBehaviour
     public void Init(int id)
     {
         this.id = id;
+        view.RPC(RPC_SET_PLAYER_ROTATION_METHOD_NAME, RpcTarget.AllBuffered, id);
+    }
+
+    [PunRPC]
+    private void RPCSetPlayerRotation(int id)
+    {
         if (id != 0)
         {
             model.transform.rotation = QUATERNION_BACKWARDS;
