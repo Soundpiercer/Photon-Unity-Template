@@ -103,6 +103,25 @@ public class PhotonPlayer : MonoBehaviour
     private void RPCJump(int dummy)
     {
         animator.SetTrigger("Jump");
+        StartCoroutine(PhysicalJumpEnumerator());
+    }
+
+
+    private const float V = 9f;
+    private const float G = -0.3266666f * 1.8333f / ANIMATOR_SPEED;
+
+    private IEnumerator PhysicalJumpEnumerator()
+    {
+        float init = transform.position.y;
+        int frame = 0;
+
+        while (transform.position.y >= init)
+        {
+            transform.position += new Vector3(0, V + frame * G);
+            frame++;
+            yield return new WaitForFixedUpdate();
+        }
+        transform.position = new Vector3(transform.position.x, init, transform.position.z);
     }
 
     public void Fire()
