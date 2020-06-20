@@ -12,7 +12,7 @@ public class PhotonBulletBehaviour : MonoBehaviour
     public Vector3 velocity;
     public GameObject explosionPrefab;
 
-    private const float LIFESPAN = 8f;
+    private const float LIFESPAN = 4f;
     private const int DAMAGE = 10;
 
     private void Start()
@@ -30,6 +30,7 @@ public class PhotonBulletBehaviour : MonoBehaviour
     private IEnumerator SelfDestructEnumerator()
     {
         yield return new WaitForSeconds(LIFESPAN);
+        Destroy(gameObject);
     }
 
     // Physical movements should be called by FixedUpdate
