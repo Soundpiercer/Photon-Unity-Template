@@ -44,8 +44,8 @@ public class PhotonPlayer : MonoBehaviour
 
     // Bullet
     private const float BULLET_INIT_DISTANCE_X_FROM_MODEL = 24f;
-    private const float BULLET_SPEED = 10f;
-    private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 135f);
+    private const float BULLET_SPEED = 12f;
+    private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 128f);
 
     // RPC
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
