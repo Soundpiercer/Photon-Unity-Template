@@ -8,15 +8,12 @@ using Photon.Realtime;
 
 public class PhotonBulletBehaviour : MonoBehaviour
 {
-    //public PhotonView view;
     public MeshRenderer sphere;
     public Vector3 velocity;
+    public GameObject explosionPrefab;
 
     private const float LIFESPAN = 8f;
     private const int DAMAGE = 10;
-
-    private const string RPC_MOVE_METHOD_NAME = "RPCMove";
-    private const string RPC_DESTROY_METHOD_NAME = "RPCDestroy";
 
     private void Start()
     {
@@ -26,42 +23,20 @@ public class PhotonBulletBehaviour : MonoBehaviour
     public void Init(Vector3 velocity)
     {
         this.velocity = velocity;
-
         StartCoroutine(SelfDestructEnumerator());
-        //view.RPC(RPC_MOVE_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
     // Self-destruct after lifespan
     private IEnumerator SelfDestructEnumerator()
     {
         yield return new WaitForSeconds(LIFESPAN);
-        //view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
+    // Physical movements should be called by FixedUpdate
     private void FixedUpdate()
     {
         gameObject.transform.position += velocity;
     }
-
-    /*
-    [PunRPC]
-    private void RPCMove(int dummy)
-    {
-        StartCoroutine(MoveEnumerator());
-    }
-
-    // Physical movements
-    private IEnumerator MoveEnumerator()
-    {
-        while (true)
-        {
-            gameObject.transform.position += velocity;
-            yield return new WaitForFixedUpdate();
-        }
-    }
-    */
-
-    public GameObject explosionPrefab;
 
     // The player hits the enemy on collision.
     private void OnCollisionEnter(Collision collision)
@@ -82,28 +57,6 @@ public class PhotonBulletBehaviour : MonoBehaviour
             }
         }
 
-        /*
-        if (view.IsMine)
-        {
-            gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        }
-        else
-        {
-            view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
-        }
-        */
-
         Destroy(gameObject);
     }
-
-    /*
-    /// <summary>
-    /// Display gameObject Destroy() via Pun RPC.
-    /// </summary>
-    [PunRPC]
-    private void RPCDestroy(int dummy)
-    {
-        Destroy(gameObject);
-    }
-    */
 }
