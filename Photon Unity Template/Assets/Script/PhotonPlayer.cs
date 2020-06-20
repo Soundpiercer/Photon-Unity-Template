@@ -77,8 +77,7 @@ public class PhotonPlayer : MonoBehaviour
         }
     }
 
-    // @ TODO : Update 메서드 부하가 센데 빼버릴수 없나?
-    private void FixedUpdate()
+    private void Update()
     {
         // Send and synchronizes my player's status to all players.
         if (view.IsMine)
@@ -170,6 +169,7 @@ public class PhotonPlayer : MonoBehaviour
     public void GotDamaged(int damage)
     {
         hp -= damage;
+
         animator.SetTrigger("Damaged");
 
         audioSource.clip = damageVoice[Random.Range(0, jumpVoice.Length)];
