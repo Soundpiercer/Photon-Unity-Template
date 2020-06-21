@@ -28,13 +28,13 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
         }
     }
 
-    public void Init()
+    private void Start()
     {
-        StartCoroutine(InitEnumerator());
+        chatText.text = "Initializing Photon Chat, please wait...";
     }
 
     // Initializes Photon Chat Synchronously
-    private IEnumerator InitEnumerator()
+    public IEnumerator InitEnumerator()
     {
         playerName = GetNewPlayerName();
 

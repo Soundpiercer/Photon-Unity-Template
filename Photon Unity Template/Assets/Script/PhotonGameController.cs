@@ -131,7 +131,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         photonDetailText.text = string.Empty;
-        GameSetup();
+        StartPhotonGame();
     }
     #endregion
 
@@ -144,23 +144,21 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private PhotonPlayer myPlayer;
 
     [Header("Game Panel")]
+    public GameObject gameDefaultUIRoot;
     public GameObject controlButtonRoot;
     public Text synchronizationTimeText;
 
-    private void GameSetup()
+    private void StartPhotonGame()
     {
         // UI Setup
         lobbyPanel.SetActive(false);
         gamePanel.SetActive(true);
 
-        // Chat Setup
-        chatController.Init();
-
         // For Synchronization Latency Check
         view.RPC(RPC_DISPLAY_SYNCHRONIZATION_TIME_METHOD_NAME, RpcTarget.AllBuffered, 0);
 
         // START!
-        StartPhotonGame();
+        StartCoroutine(StartPhotonGameEnumerator());
     }
 
     [PunRPC]
@@ -169,11 +167,13 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         synchronizationTimeText.text = "Synchronized at : " + System.DateTime.Now.Ticks.ToString();
     }
 
-    private void StartPhotonGame()
+    private IEnumerator StartPhotonGameEnumerator()
     {
-        int id = GetVacantSlotID();
+        // Chat Setup
+        yield return chatController.InitEnumerator();
 
-        // instantiate the player with position and rotation specified.
+        // instantiate and init the player with position and rotation specified.
+        int id = GetVacantSlotID();
         myPlayer = PhotonNetwork.Instantiate(
             photonPlayerPrefab.name,
             spawnPoints[id].position,
@@ -184,6 +184,10 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
         // notice to all players that my player's spawn point is now occupied
         view.RPC(RPC_SET_OCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, id);
+
+        // Enable User-Controllable UIs
+        gameDefaultUIRoot.SetActive(true);
+        controlButtonRoot.SetActive(true);
     }
 
     [PunRPC]
@@ -239,6 +243,8 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public void EndPhotonGame()
     {
         // UI DeInit
+        gameDefaultUIRoot.SetActive(false);
+        controlButtonRoot.SetActive(false);
         gamePanel.SetActive(false);
         lobbyPanel.SetActive(true);
 
