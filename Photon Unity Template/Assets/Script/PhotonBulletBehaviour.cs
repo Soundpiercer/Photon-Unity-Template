@@ -8,53 +8,35 @@ using Photon.Realtime;
 
 public class PhotonBulletBehaviour : MonoBehaviour
 {
-    public PhotonView view;
-    public MeshRenderer cube;
+    public MeshRenderer sphere;
     public Vector3 velocity;
+    public GameObject explosionPrefab;
 
-    private bool hasCollided;
-
-    private const float LIFESPAN = 8f;
+    private const float LIFESPAN = 4f;
     private const int DAMAGE = 10;
-
-    private const string RPC_MOVE_METHOD_NAME = "RPCMove";
-    private const string RPC_DESTROY_METHOD_NAME = "RPCDestroy";
 
     private void Start()
     {
-        cube.material.color = Color.red;
+        sphere.material.color = Color.red;
     }
 
     public void Init(Vector3 velocity)
     {
         this.velocity = velocity;
-
         StartCoroutine(SelfDestructEnumerator());
-        view.RPC(RPC_MOVE_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
-
-    [PunRPC]
-    private void RPCMove(int dummy)
-    {
-        StartCoroutine(MoveEnumerator());
-    }
-
-    // Physical movements
-    private IEnumerator MoveEnumerator()
-    {
-        while (!hasCollided)
-        {
-            gameObject.transform.position += velocity;
-            yield return null;
-        }
-    }
-
 
     // Self-destruct after lifespan
     private IEnumerator SelfDestructEnumerator()
     {
         yield return new WaitForSeconds(LIFESPAN);
-        view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
+        Destroy(gameObject);
+    }
+
+    // Physical movements should be called by FixedUpdate
+    private void FixedUpdate()
+    {
+        gameObject.transform.position += velocity;
     }
 
     // The player hits the enemy on collision.
@@ -65,26 +47,17 @@ public class PhotonBulletBehaviour : MonoBehaviour
         if (player != null)
         {
             // enemy is killed when the HP becomes below 0.
-            player.hp -= DAMAGE;
+            player.GotDamaged(damage: DAMAGE);
+
+            TraumaInducer explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity).GetComponent<TraumaInducer>();
+            explosion.PlayExplosion();
+
             if (player.hp <= 0)
             {
                 player.HasKilled();
             }
         }
 
-        hasCollided = true;
-
-        if (!view.IsMine)
-            view.RPC(RPC_DESTROY_METHOD_NAME, RpcTarget.AllBuffered, 0);
-    }
-
-    /// <summary>
-    /// Display gameObject Destroy() via Pun RPC.
-    /// </summary>
-    [PunRPC]
-    private void RPCDestroy(int dummy)
-    {
         Destroy(gameObject);
     }
-
 }

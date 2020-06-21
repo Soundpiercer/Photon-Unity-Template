@@ -21,8 +21,9 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     [Header("Lobby Panel")]
     public Text photonStatusText;
     public Text photonDetailText;
+    public Text fpsText;
     public GameObject quickStartButton;
-    public GameObject logoutButton;
+    public GameObject quitButton;
 
     private string defaultSuccessMessage = string.Empty;
     private const string QUICKSTART_SUCCESS_MESSAGE = "\nSuccessfully joined by QuickStart, ";
@@ -37,6 +38,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        Application.targetFrameRate = 60;
         PhotonNetworkManager.Instance.Init(
             onInitSuccess: region =>
             {
@@ -65,6 +67,17 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         }
     }
 
+    private void Update()
+    {
+        fpsText.text = "FPS : " + System.Math.Round((1 / Time.deltaTime), 4);
+
+#if UNITY_EDITOR
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.X)) Fire();
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.C)) Jump();
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.V)) Duck();
+#endif
+    }
+
     #region UI Interactions
     public void QuickStart()
     {
@@ -72,21 +85,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinRandomRoom();
 
         quickStartButton.SetActive(false);
-        logoutButton.SetActive(true);
-    }
-
-    // @ TODO : EndPhotonGame-Logout 일원화
-    // @ TODO : RPC Method 위치 추가로 정리 가능한가?
-    public void Logout()
-    {
-        // notice to all players that my player's spawn point is now available
-        view.RPC(RPC_SET_UNOCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, myPlayer.id);
-
-        PhotonNetwork.LeaveRoom();
-        photonDetailText.text = string.Empty;
-
-        quickStartButton.SetActive(true);
-        logoutButton.SetActive(false);
+        quitButton.SetActive(false);
     }
 
     public void Exit()
@@ -132,39 +131,34 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         photonDetailText.text = string.Empty;
-        GameSetup();
+        StartPhotonGame();
     }
     #endregion
 
     #region Photon Game
     [Header("Photon Game")]
+    public GameObject photonPlayerPrefab;
     public Transform[] spawnPoints;
     public bool[] isOccupied;
-    public GameObject photonPlayerPrefab;
-    public GameObject photonBulletPrefab;
+
     private PhotonPlayer myPlayer;
-    private readonly Vector3 UP = new Vector3(0, 10);
 
     [Header("Game Panel")]
+    public GameObject gameDefaultUIRoot;
+    public GameObject controlButtonRoot;
     public Text synchronizationTimeText;
 
-    private const float DISTANCE_FROM_BODY = 60f;
-    private const float BULLET_SPEED = 6f;
-
-    private void GameSetup()
+    private void StartPhotonGame()
     {
         // UI Setup
         lobbyPanel.SetActive(false);
         gamePanel.SetActive(true);
 
-        // Chat Setup
-        chatController.Init();
-
         // For Synchronization Latency Check
         view.RPC(RPC_DISPLAY_SYNCHRONIZATION_TIME_METHOD_NAME, RpcTarget.AllBuffered, 0);
 
         // START!
-        StartPhotonGame();
+        StartCoroutine(StartPhotonGameEnumerator());
     }
 
     [PunRPC]
@@ -173,20 +167,27 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         synchronizationTimeText.text = "Synchronized at : " + System.DateTime.Now.Ticks.ToString();
     }
 
-    private void StartPhotonGame()
+    private IEnumerator StartPhotonGameEnumerator()
     {
-        int id = SelectTransform();
+        // Chat Setup
+        yield return chatController.InitEnumerator();
 
+        // instantiate and init the player with position and rotation specified.
+        int id = GetVacantSlotID();
         myPlayer = PhotonNetwork.Instantiate(
             photonPlayerPrefab.name,
             spawnPoints[id].position,
             Quaternion.identity,
             0)
             .GetComponent<PhotonPlayer>();
+        myPlayer.Init(id);
 
         // notice to all players that my player's spawn point is now occupied
         view.RPC(RPC_SET_OCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, id);
-        myPlayer.id = id;
+
+        // Enable User-Controllable UIs
+        gameDefaultUIRoot.SetActive(true);
+        controlButtonRoot.SetActive(true);
     }
 
     [PunRPC]
@@ -201,7 +202,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         isOccupied[id] = false;
     }
 
-    private int SelectTransform()
+    private int GetVacantSlotID()
     {
         if (PhotonNetwork.IsMasterClient)
         {
@@ -215,33 +216,35 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         }
     }
 
-    public void MoveUp()
+    public void Jump()
     {
-        myPlayer.transform.localPosition += UP;
-    }
-
-    public void MoveDown()
-    {
-        myPlayer.transform.localPosition -= UP;
+        myPlayer.Jump();
+        StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.JUMP_TIME));
     }
 
     public void Fire()
     {
-        Vector3 fireDirection = (myPlayer.id == 0 ? Vector3.right : Vector3.left);
+        myPlayer.Fire();
+    }
 
-        PhotonBulletBehaviour bullet = PhotonNetwork.Instantiate(
-            photonBulletPrefab.name,
-            myPlayer.transform.position + (fireDirection * DISTANCE_FROM_BODY),
-            Quaternion.identity,
-            0)
-            .GetComponent<PhotonBulletBehaviour>();
+    public void Duck()
+    {
+        myPlayer.Duck();
+        StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.INVINCIBLE_TIME_WHILE_DUCKING));
+    }
 
-        bullet.Init(fireDirection * BULLET_SPEED);
+    private IEnumerator HideButtonsWhileDoingActionEnumerator(float time)
+    {
+        controlButtonRoot.SetActive(false);
+        yield return new WaitForSeconds(time);
+        controlButtonRoot.SetActive(true);
     }
 
     public void EndPhotonGame()
     {
         // UI DeInit
+        gameDefaultUIRoot.SetActive(false);
+        controlButtonRoot.SetActive(false);
         gamePanel.SetActive(false);
         lobbyPanel.SetActive(true);
 
@@ -249,6 +252,21 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         chatController.DeInit();
 
         Logout();
+    }
+
+    private void Logout()
+    {
+        // notice to all players that my player's spawn point is now available
+        view.RPC(RPC_SET_UNOCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, myPlayer.id);
+
+        PhotonNetwork.LeaveRoom();
+        photonDetailText.text = string.Empty;
+
+        // Player DeInit
+        myPlayer = null;
+
+        quickStartButton.SetActive(true);
+        quitButton.SetActive(true);
     }
     #endregion
 }
