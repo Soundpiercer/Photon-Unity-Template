@@ -15,7 +15,7 @@ public class PhotonChatController : MonoBehaviour, IChatClientListener
     private ChatClient chatClient;
     private string playerName = string.Empty;
 
-    private const string PHOTON_CHAT_ID = ""; // must be defined
+    private const string PHOTON_CHAT_ID = "73f1a5c7-3033-4fbd-a700-0950822f442e"; // must be defined
     private const string DEFAULT_CHANNEL_NAME = "channel01";
 
     private void Awake()
