@@ -45,14 +45,16 @@ public class PhotonPlayer : MonoBehaviour
     private const float DUCK_STATE_SPEED = 1f;
     private const float DAMAGE01_ANIMATION_TIME = 3.567f;
     private const float DAMAGE01_STATE_SPEED = 1f;
+    private const float DAMAGE01_INVINCIBLE_MARGIN = -0.4f;
+    private System.Action HideControlButtonsOnDamagedCallback;
 
     public const float JUMP_TIME = JUMP_ANIMATION_TIME / JUMP_STATE_SPEED / ANIMATOR_SPEED;
     public const float INVINCIBLE_TIME_WHILE_DUCKING = DUCK_ANIMATION_TIME / DUCK_STATE_SPEED / ANIMATOR_SPEED;
-    public const float INVINCIBLE_TIME_WHILE_DAMAGED = DAMAGE01_ANIMATION_TIME / DAMAGE01_STATE_SPEED / ANIMATOR_SPEED;
+    public const float INVINCIBLE_TIME_WHILE_DAMAGED = DAMAGE01_ANIMATION_TIME / DAMAGE01_STATE_SPEED / ANIMATOR_SPEED + DAMAGE01_INVINCIBLE_MARGIN;
 
     // Bullet
-    private const float BULLET_INIT_DISTANCE_X_FROM_MODEL = 24f;
-    private const float BULLET_SPEED = 12f;
+    private const float BULLET_INIT_DISTANCE_X_FROM_MODEL = 240f;
+    private const float BULLET_SPEED = -12f;
     private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 128f);
 
     // RPC
@@ -76,10 +78,12 @@ public class PhotonPlayer : MonoBehaviour
         animator.SetTrigger("Entry");
     }
 
-    public void Init(int id)
+    public void Init(int id, System.Action hideControlButtonsOnDamagedCallback = null)
     {
         this.id = id;
         view.RPC(RPC_SET_PLAYER_ROTATION_METHOD_NAME, RpcTarget.AllBuffered, id);
+
+        HideControlButtonsOnDamagedCallback = hideControlButtonsOnDamagedCallback;
     }
 
     [PunRPC]
@@ -208,6 +212,7 @@ public class PhotonPlayer : MonoBehaviour
         audioSource.Play();
 
         StartCoroutine(MakePlayerInvincibleWhilePlayingAnimationEnumerator(INVINCIBLE_TIME_WHILE_DAMAGED));
+        HideControlButtonsOnDamagedCallback();
     }
 
     private IEnumerator MakePlayerInvincibleWhilePlayingAnimationEnumerator(float time)
