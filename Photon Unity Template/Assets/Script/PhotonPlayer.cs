@@ -97,7 +97,7 @@ public class PhotonPlayer : MonoBehaviour
     private void Update()
     {
         // Send and synchronizes my player's status to all players.
-        if (view.IsMine)
+        if (PhotonNetwork.InRoom && view.IsMine)
             view.RPC(RPC_UPDATE_HP_METHOD_NAME, RpcTarget.AllBuffered, hp);
     }
 

@@ -50,17 +50,6 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
             });
     }
 
-    private void Update()
-    {
-        fpsText.text = "FPS : " + System.Math.Round((1 / Time.deltaTime), 4);
-
-#if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.X)) Fire();
-        if (Input.GetKeyDown(KeyCode.C)) Jump();
-        if (Input.GetKeyDown(KeyCode.V)) Duck();
-#endif
-    }
-
     private IEnumerator DisplayRoomNumberEnumerator()
     {
         while (true)
@@ -76,6 +65,17 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
             yield return new WaitForSeconds(1f);
         }
+    }
+
+    private void Update()
+    {
+        fpsText.text = "FPS : " + System.Math.Round((1 / Time.deltaTime), 4);
+
+#if UNITY_EDITOR
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.X)) Fire();
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.C)) Jump();
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.V)) Duck();
+#endif
     }
 
     #region UI Interactions
