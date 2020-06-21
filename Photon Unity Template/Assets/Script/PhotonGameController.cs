@@ -14,6 +14,10 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public PhotonView view;
     public PhotonChatController chatController;
 
+    [Header("Audio")]
+    public AudioSource lobbyBGM;
+    public AudioSource maingameBGM;
+
     [Header("Panels")]
     public GameObject lobbyPanel;
     public GameObject gamePanel;
@@ -38,6 +42,8 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        lobbyBGM.Play();
+
         Application.targetFrameRate = 60;
         PhotonNetworkManager.Instance.Init(
             onInitSuccess: region =>
@@ -96,6 +102,8 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private IEnumerator ExitEnumerator()
     {
         yield return StartCoroutine(PhotonNetworkManager.Instance.DeInitEnumerator());
+
+        lobbyBGM.Stop();
         Application.Quit();
     }
     #endregion
@@ -150,6 +158,10 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     private void StartPhotonGame()
     {
+        // Audio
+        lobbyBGM.Stop();
+        maingameBGM.Play();
+
         // UI Setup
         lobbyPanel.SetActive(false);
         gamePanel.SetActive(true);
@@ -252,6 +264,14 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         chatController.DeInit();
 
         Logout();
+
+        // UI
+        quickStartButton.SetActive(true);
+        quitButton.SetActive(true);
+
+        // Audio
+        maingameBGM.Stop();
+        lobbyBGM.Play();
     }
 
     private void Logout()
@@ -264,9 +284,6 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
         // Player DeInit
         myPlayer = null;
-
-        quickStartButton.SetActive(true);
-        quitButton.SetActive(true);
     }
     #endregion
 }
