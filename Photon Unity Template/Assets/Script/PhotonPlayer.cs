@@ -177,6 +177,11 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Duck()
     {
+        // Don't Duck on damaged or ducking
+        bool isInvincible = GetComponent<Collider>().enabled == false;
+        if (isInvincible)
+            return;
+
         view.RPC(RPC_DUCK_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
