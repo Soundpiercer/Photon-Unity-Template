@@ -23,7 +23,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public Text photonDetailText;
     public Text fpsText;
     public GameObject quickStartButton;
-    public GameObject logoutButton;
+    public GameObject quitButton;
 
     private string defaultSuccessMessage = string.Empty;
     private const string QUICKSTART_SUCCESS_MESSAGE = "\nSuccessfully joined by QuickStart, ";
@@ -85,21 +85,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinRandomRoom();
 
         quickStartButton.SetActive(false);
-        logoutButton.SetActive(true);
-    }
-
-    // @ TODO : EndPhotonGame-Logout 일원화
-    // @ TODO : RPC Method 위치 추가로 정리 가능한가?
-    public void Logout()
-    {
-        // notice to all players that my player's spawn point is now available
-        view.RPC(RPC_SET_UNOCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, myPlayer.id);
-
-        PhotonNetwork.LeaveRoom();
-        photonDetailText.text = string.Empty;
-
-        quickStartButton.SetActive(true);
-        logoutButton.SetActive(false);
+        quitButton.SetActive(false);
     }
 
     public void Exit()
@@ -260,6 +246,21 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         chatController.DeInit();
 
         Logout();
+    }
+
+    private void Logout()
+    {
+        // notice to all players that my player's spawn point is now available
+        view.RPC(RPC_SET_UNOCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, myPlayer.id);
+
+        PhotonNetwork.LeaveRoom();
+        photonDetailText.text = string.Empty;
+
+        // Player DeInit
+        myPlayer = null;
+
+        quickStartButton.SetActive(true);
+        quitButton.SetActive(true);
     }
     #endregion
 }
