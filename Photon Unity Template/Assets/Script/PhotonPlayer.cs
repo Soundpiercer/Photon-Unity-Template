@@ -35,12 +35,20 @@ public class PhotonPlayer : MonoBehaviour
     private const string HP_STRING = " HP";
 
     // Model
+    public const float ANIMATOR_SPEED = 1.5f;
     private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, -90f, 0);
-    private const float ANIMATOR_SPEED = 1.5f;
     private readonly Vector3 STANDBY_POSITION = new Vector3(2000f, 2000f, 0);
 
-    private const float INVINCIBLE_TIME_WHILE_DUCKING = 1.5f / ANIMATOR_SPEED;
-    private const float INVINCIBLE_TIME_WHILE_DAMAGED = 3.125f / ANIMATOR_SPEED;
+    private const float JUMP_ANIMATION_TIME = 1.833f;
+    private const float JUMP_STATE_SPEED = 1f;
+    private const float DUCK_ANIMATION_TIME = 1.367f;
+    private const float DUCK_STATE_SPEED = 1f;
+    private const float DAMAGE01_ANIMATION_TIME = 3.567f;
+    private const float DAMAGE01_STATE_SPEED = 1f;
+
+    public const float JUMP_TIME = JUMP_ANIMATION_TIME / JUMP_STATE_SPEED;
+    public const float INVINCIBLE_TIME_WHILE_DUCKING = DUCK_ANIMATION_TIME / DUCK_STATE_SPEED / ANIMATOR_SPEED;
+    public const float INVINCIBLE_TIME_WHILE_DAMAGED = DAMAGE01_ANIMATION_TIME / DAMAGE01_STATE_SPEED / ANIMATOR_SPEED;
 
     // Bullet
     private const float BULLET_INIT_DISTANCE_X_FROM_MODEL = 24f;
@@ -99,6 +107,11 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Jump()
     {
+        // Don't Jump on damaged or ducking
+        bool isInvincible = GetComponent<Collider>().enabled == false;
+        if (isInvincible)
+            return;
+
         view.RPC(RPC_JUMP_METHOD_NAME, RpcTarget.AllBuffered, 0);
 
         audioSource.clip = jumpVoice[Random.Range(0, jumpVoice.Length)];
@@ -111,7 +124,6 @@ public class PhotonPlayer : MonoBehaviour
         animator.SetTrigger("Jump");
         StartCoroutine(PhysicalJumpEnumerator());
     }
-
 
     private const float V = 9f;
     private const float G = -0.3266666f * 1.8333f / ANIMATOR_SPEED;

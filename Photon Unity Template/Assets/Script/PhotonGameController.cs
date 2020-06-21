@@ -156,8 +156,9 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public bool[] isOccupied;
 
     private PhotonPlayer myPlayer;
-    
+
     [Header("Game Panel")]
+    public GameObject controlButtonRoot;
     public Text synchronizationTimeText;
 
     private void GameSetup()
@@ -228,6 +229,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public void Jump()
     {
         myPlayer.Jump();
+        StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.JUMP_TIME));
     }
 
     public void Fire()
@@ -238,6 +240,14 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public void Duck()
     {
         myPlayer.Duck();
+        StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.INVINCIBLE_TIME_WHILE_DUCKING));
+    }
+
+    private IEnumerator HideButtonsWhileDoingActionEnumerator(float time)
+    {
+        controlButtonRoot.SetActive(false);
+        yield return new WaitForSeconds(time);
+        controlButtonRoot.SetActive(true);
     }
 
     public void EndPhotonGame()
