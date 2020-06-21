@@ -46,7 +46,7 @@ public class PhotonPlayer : MonoBehaviour
     private const float DAMAGE01_ANIMATION_TIME = 3.567f;
     private const float DAMAGE01_STATE_SPEED = 1f;
 
-    public const float JUMP_TIME = JUMP_ANIMATION_TIME / JUMP_STATE_SPEED;
+    public const float JUMP_TIME = JUMP_ANIMATION_TIME / JUMP_STATE_SPEED / ANIMATOR_SPEED;
     public const float INVINCIBLE_TIME_WHILE_DUCKING = DUCK_ANIMATION_TIME / DUCK_STATE_SPEED / ANIMATOR_SPEED;
     public const float INVINCIBLE_TIME_WHILE_DAMAGED = DAMAGE01_ANIMATION_TIME / DAMAGE01_STATE_SPEED / ANIMATOR_SPEED;
 
@@ -144,7 +144,13 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Fire()
     {
+        // Don't Fire if already has killed
         if (hasKilled)
+            return;
+
+        // Don't Fire on damaged or ducking
+        bool isInvincible = GetComponent<Collider>().enabled == false;
+        if (isInvincible)
             return;
 
         view.RPC(RPC_FIRE_METHOD_NAME, RpcTarget.AllBuffered, id);
