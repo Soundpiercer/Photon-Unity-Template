@@ -72,9 +72,8 @@ public class PhotonPlayer : MonoBehaviour
         }
 
         animator.speed = ANIMATOR_SPEED;
-
-        audioSource.clip = initVoice;
-        audioSource.Play();
+        animator.SetBool("isMine", view.IsMine);
+        animator.SetTrigger("Entry");
     }
 
     public void Init(int id)
@@ -90,6 +89,9 @@ public class PhotonPlayer : MonoBehaviour
         {
             model.transform.rotation = QUATERNION_BACKWARDS;
         }
+
+        audioSource.clip = initVoice;
+        audioSource.Play();
     }
 
     private void Update()
