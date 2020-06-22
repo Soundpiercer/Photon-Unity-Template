@@ -10,7 +10,6 @@ public class PhotonBulletBehaviour : MonoBehaviour
 {
     public MeshRenderer sphere;
     public Vector3 velocity;
-    public GameObject explosionPrefab;
 
     private const float LIFESPAN = 4f;
     private const int DAMAGE = 10;
@@ -48,9 +47,7 @@ public class PhotonBulletBehaviour : MonoBehaviour
         {
             // enemy is killed when the HP becomes below 0.
             player.GotDamaged(damage: DAMAGE);
-
-            TraumaInducer explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity).GetComponent<TraumaInducer>();
-            explosion.PlayExplosion();
+            PhotonGameManager.Instance.PlayExplosion(gameObject.transform.position);
 
             if (player.hp <= 0)
             {
