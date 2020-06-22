@@ -192,10 +192,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
             Quaternion.identity,
             0)
             .GetComponent<PhotonPlayer>();
-        myPlayer.Init(
-            id: id, 
-            hideControlButtonsOnDamagedCallback: () => { StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.INVINCIBLE_TIME_WHILE_DAMAGED));}
-            );
+        myPlayer.Init(id);
 
         // notice to all players that my player's spawn point is now occupied
         view.RPC(RPC_SET_OCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, id);
