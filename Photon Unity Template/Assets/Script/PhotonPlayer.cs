@@ -128,22 +128,34 @@ public class PhotonPlayer : MonoBehaviour
         StartCoroutine(PhysicalJumpEnumerator());
     }
 
-    private const float V = 9f;
-    private const float G = -0.3266666f * 1.8333f / ANIMATOR_SPEED;
+    #region Physical Jump Implementation
+    // if you want to adjust physical movements, change 4 values : premargin, postmargin, V0, T0
+    private const float JUMP_PHYSICS_PREMARGIN = 0.25f;
+    private const float JUMP_PHYSICS_POSTMARGIN = 0.45f;
+    private const int FRAMES_IN_JUMPING = (int)((JUMP_TIME - JUMP_PHYSICS_PREMARGIN - JUMP_PHYSICS_POSTMARGIN) * 60); // FixedUpdate : 60fps
+
+    private const float V0 = 12f;
+    private const int T0 = FRAMES_IN_JUMPING / 2;
 
     private IEnumerator PhysicalJumpEnumerator()
     {
-        float init = transform.position.y;
-        int frame = 0;
+        yield return new WaitForSeconds(JUMP_PHYSICS_PREMARGIN);
 
-        while (transform.position.y >= init)
+        float y0 = transform.position.y; // initYpos
+        int frame = 0;
+        Vector3 velocity = new Vector3();
+
+        while (frame < FRAMES_IN_JUMPING)
         {
-            transform.position += new Vector3(0, V + frame * G);
+            velocity.y = -(V0 / T0) * (frame - T0); // v = -(v0/t0)(x - t0)
+            transform.position += velocity;
             frame++;
             yield return new WaitForFixedUpdate();
         }
-        transform.position = new Vector3(transform.position.x, init, transform.position.z);
+        Debug.LogWarning(frame);
+        transform.position = new Vector3(transform.position.x, y0, transform.position.z);
     }
+    #endregion
 
     public void Fire()
     {
