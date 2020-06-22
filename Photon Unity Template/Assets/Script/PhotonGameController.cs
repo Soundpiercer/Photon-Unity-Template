@@ -14,6 +14,10 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public PhotonView view;
     public PhotonChatController chatController;
 
+    [Header("Audio")]
+    public AudioSource lobbyBGM;
+    public AudioSource maingameBGM;
+
     [Header("Panels")]
     public GameObject lobbyPanel;
     public GameObject gamePanel;
@@ -23,7 +27,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public Text photonDetailText;
     public Text fpsText;
     public GameObject quickStartButton;
-    public GameObject logoutButton;
+    public GameObject quitButton;
 
     private string defaultSuccessMessage = string.Empty;
     private const string QUICKSTART_SUCCESS_MESSAGE = "\nSuccessfully joined by QuickStart, ";
@@ -38,6 +42,8 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        lobbyBGM.Play();
+
         Application.targetFrameRate = 60;
         PhotonNetworkManager.Instance.Init(
             onInitSuccess: region =>
@@ -48,11 +54,6 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
                 quickStartButton.SetActive(true);
                 StartCoroutine(DisplayRoomNumberEnumerator());
             });
-    }
-
-    private void Update()
-    {
-        fpsText.text = "FPS : " + System.Math.Round((1 / Time.deltaTime), 4);
     }
 
     private IEnumerator DisplayRoomNumberEnumerator()
@@ -72,6 +73,17 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         }
     }
 
+    private void Update()
+    {
+        fpsText.text = "FPS : " + System.Math.Round((1 / Time.deltaTime), 4);
+
+#if UNITY_EDITOR
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.X)) Fire();
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.C)) Jump();
+        if (myPlayer != null && Input.GetKeyDown(KeyCode.V)) Duck();
+#endif
+    }
+
     #region UI Interactions
     public void QuickStart()
     {
@@ -79,21 +91,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinRandomRoom();
 
         quickStartButton.SetActive(false);
-        logoutButton.SetActive(true);
-    }
-
-    // @ TODO : EndPhotonGame-Logout 일원화
-    // @ TODO : RPC Method 위치 추가로 정리 가능한가?
-    public void Logout()
-    {
-        // notice to all players that my player's spawn point is now available
-        view.RPC(RPC_SET_UNOCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, myPlayer.id);
-
-        PhotonNetwork.LeaveRoom();
-        photonDetailText.text = string.Empty;
-
-        quickStartButton.SetActive(true);
-        logoutButton.SetActive(false);
+        quitButton.SetActive(false);
     }
 
     public void Exit()
@@ -104,6 +102,8 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private IEnumerator ExitEnumerator()
     {
         yield return StartCoroutine(PhotonNetworkManager.Instance.DeInitEnumerator());
+
+        lobbyBGM.Stop();
         Application.Quit();
     }
     #endregion
@@ -139,41 +139,38 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         photonDetailText.text = string.Empty;
-        GameSetup();
+        StartPhotonGame();
     }
     #endregion
 
     #region Photon Game
     [Header("Photon Game")]
+    public GameObject photonPlayerPrefab;
     public Transform[] spawnPoints;
     public bool[] isOccupied;
-    public GameObject photonPlayerPrefab;
-    public GameObject photonBulletPrefab;
+
     private PhotonPlayer myPlayer;
-    
+
     [Header("Game Panel")]
+    public GameObject gameDefaultUIRoot;
+    public GameObject controlButtonRoot;
     public Text synchronizationTimeText;
 
-    private const float X_DISTANCE_FROM_BODY = 24f;
-    private const float BULLET_SPEED = 10f;
-
-    private readonly Quaternion QUATERNION_BACKWARDS = Quaternion.Euler(0, 180f, 0);
-    private readonly Vector3 Y_DISTANCE_FROM_GROUND = new Vector3(0, 135f);
-
-    private void GameSetup()
+    private void StartPhotonGame()
     {
+        // Audio
+        lobbyBGM.Stop();
+        maingameBGM.Play();
+
         // UI Setup
         lobbyPanel.SetActive(false);
         gamePanel.SetActive(true);
-
-        // Chat Setup
-        chatController.Init();
 
         // For Synchronization Latency Check
         view.RPC(RPC_DISPLAY_SYNCHRONIZATION_TIME_METHOD_NAME, RpcTarget.AllBuffered, 0);
 
         // START!
-        StartPhotonGame();
+        StartCoroutine(StartPhotonGameEnumerator());
     }
 
     [PunRPC]
@@ -182,22 +179,30 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         synchronizationTimeText.text = "Synchronized at : " + System.DateTime.Now.Ticks.ToString();
     }
 
-    private void StartPhotonGame()
+    private IEnumerator StartPhotonGameEnumerator()
     {
-        int id = SelectTransform();
-        bool isBackwards = id != 0;
+        // Chat Setup
+        yield return chatController.InitEnumerator();
 
-        // instantiate the player with position and rotation specified.
+        // instantiate and init the player with position and rotation specified.
+        int id = GetVacantSlotID();
         myPlayer = PhotonNetwork.Instantiate(
             photonPlayerPrefab.name,
             spawnPoints[id].position,
-            isBackwards ? QUATERNION_BACKWARDS : Quaternion.identity,
+            Quaternion.identity,
             0)
             .GetComponent<PhotonPlayer>();
+        myPlayer.Init(
+            id: id, 
+            hideControlButtonsOnDamagedCallback: () => { StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.INVINCIBLE_TIME_WHILE_DAMAGED));}
+            );
 
         // notice to all players that my player's spawn point is now occupied
         view.RPC(RPC_SET_OCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, id);
-        myPlayer.id = id;
+
+        // Enable User-Controllable UIs
+        gameDefaultUIRoot.SetActive(true);
+        controlButtonRoot.SetActive(true);
     }
 
     [PunRPC]
@@ -212,7 +217,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         isOccupied[id] = false;
     }
 
-    private int SelectTransform()
+    private int GetVacantSlotID()
     {
         if (PhotonNetwork.IsMasterClient)
         {
@@ -229,26 +234,32 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public void Jump()
     {
         myPlayer.Jump();
+        StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.JUMP_TIME));
     }
 
     public void Fire()
     {
         myPlayer.Fire();
-        Vector3 fireDirection = (myPlayer.id == 0 ? Vector3.right : Vector3.left);
+    }
 
-        PhotonBulletBehaviour bullet = PhotonNetwork.Instantiate(
-            photonBulletPrefab.name,
-            myPlayer.transform.position + (fireDirection * X_DISTANCE_FROM_BODY) + Y_DISTANCE_FROM_GROUND,
-            Quaternion.identity,
-            0)
-            .GetComponent<PhotonBulletBehaviour>();
+    public void Duck()
+    {
+        myPlayer.Duck();
+        StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.INVINCIBLE_TIME_WHILE_DUCKING));
+    }
 
-        bullet.Init(fireDirection * BULLET_SPEED);
+    private IEnumerator HideButtonsWhileDoingActionEnumerator(float time)
+    {
+        controlButtonRoot.SetActive(false);
+        yield return new WaitForSeconds(time);
+        controlButtonRoot.SetActive(true);
     }
 
     public void EndPhotonGame()
     {
         // UI DeInit
+        gameDefaultUIRoot.SetActive(false);
+        controlButtonRoot.SetActive(false);
         gamePanel.SetActive(false);
         lobbyPanel.SetActive(true);
 
@@ -256,6 +267,26 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         chatController.DeInit();
 
         Logout();
+
+        // UI
+        quickStartButton.SetActive(true);
+        quitButton.SetActive(true);
+
+        // Audio
+        maingameBGM.Stop();
+        lobbyBGM.Play();
+    }
+
+    private void Logout()
+    {
+        // notice to all players that my player's spawn point is now available
+        view.RPC(RPC_SET_UNOCCUPIED_METHOD_NAME, RpcTarget.AllBuffered, myPlayer.id);
+
+        PhotonNetwork.LeaveRoom();
+        photonDetailText.text = string.Empty;
+
+        // Player DeInit
+        myPlayer = null;
     }
     #endregion
 }

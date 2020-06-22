@@ -105,7 +105,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   view: {fileID: 285267141527378229}
+  id: 0
+  hasKilled: 0
+  hp: 0
+  hpText: {fileID: 4653221111465928105}
+  model: {fileID: 880400570960172352}
   animator: {fileID: 880400570969532192}
+  photonBulletPrefab: {fileID: 1558436499508454, guid: 0d8170034b34d7745aca33dc54a1f73b,
+    type: 3}
   audioSource: {fileID: 4843325552313133781}
   initVoice: {fileID: 8300000, guid: 28411f84ac99843ba9649b2cae8c879e, type: 3}
   jumpVoice:
@@ -116,9 +123,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c0cc9bb81e32248d7b64b27359c13a43, type: 3}
   - {fileID: 8300000, guid: 23e7ee0c4720c4bd48c405abb4ffa7f2, type: 3}
   killedVoice: {fileID: 8300000, guid: c499dad9f455240faa7c4a9964c09f3c, type: 3}
-  hpText: {fileID: 4653221111465928105}
-  id: 0
-  hp: 0
 --- !u!54 &4178238791170025675
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -146,8 +150,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 36, y: 180, z: 36}
-  m_Center: {x: 0, y: 90, z: 0}
+  m_Size: {x: 36, y: 120, z: 36}
+  m_Center: {x: 0, y: 120, z: 0}
 --- !u!82 &4843325552313133781
 AudioSource:
   m_ObjectHideFlags: 0
@@ -294,7 +298,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10100, guid: 0000000000000000e000000000000000, type: 0}
+  - {fileID: 2100000, guid: fc20b019c38d14ea393870fc27f52eb0, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -330,10 +334,10 @@ TextMesh:
   m_Anchor: 4
   m_Alignment: 1
   m_TabSize: 4
-  m_FontSize: 200
+  m_FontSize: 180
   m_FontStyle: 0
   m_RichText: 1
-  m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Font: {fileID: 12800000, guid: fc20b019c38d14ea393870fc27f52eb0, type: 3}
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
@@ -554,6 +558,12 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: 212b3a957fa7bee41a0bf8c3b14ce293, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 412b92d4feeb9c548bfa98f62c4d1022, type: 3}
+--- !u!1 &880400570960172352 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100096, guid: 412b92d4feeb9c548bfa98f62c4d1022,
+    type: 3}
+  m_PrefabInstance: {fileID: 880400570960073280}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &880400570960464032 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400096, guid: 412b92d4feeb9c548bfa98f62c4d1022,
