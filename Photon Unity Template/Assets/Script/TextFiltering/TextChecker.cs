@@ -41,11 +41,6 @@ public class TextChecker
     private static string censoredWordsCSVDataString;
 
     /// <summary>
-    /// Data that extracted from the ExceptionWord CSV.
-    /// </summary>
-    //public static string exceptionWordsCSVDataString;
-
-    /// <summary>
     /// Censored words container.
     /// </summary>
     private static Trie censoredWordsTrie;
@@ -76,23 +71,14 @@ public class TextChecker
         // 2. Parse CSVs.
         List<CensoredWord> censoredWordList = new List<CensoredWord>
         { new CensoredWord("fuck"), new CensoredWord("shit") };
-        //CSVParser.Convert<CensoredWord>(censoredWordsCSVDataString);
-        //List<ExceptionWord> exceptionList = CSVParser.Convert<ExceptionWord>(exceptionWordsCSVDataString);
 
-        // @ TODO : exception logic should be improved
-        // 3. Discards exception words from the censoredwords list.
-        IEnumerable<string> censoredWordsQuery = from s in censoredWordList select s.Key;
-        //IEnumerable<string> exceptionWordsQuery = from s in exceptionList select s.Key;
-
-        //censoredWordsQuery = censoredWordsQuery.Except(exceptionWordsQuery);
-
-        // 4. Add to Trie
-        foreach (string word in censoredWordsQuery)
+        // 3. Add to Trie
+        foreach (CensoredWord word in censoredWordList)
         {
-            censoredWordsTrie.Add(word);
+            censoredWordsTrie.Add(word.Key);
         }
 
-        // 5. Build Tries
+        // 4. Build Tries
         censoredWordsTrie.Build();
     }
 
