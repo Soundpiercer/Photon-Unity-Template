@@ -230,17 +230,29 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     public void Jump()
     {
+        // Don't Jump on damaged, ducking or killed
+        if (myPlayer.isInvincible || myPlayer.hasKilled)
+            return;
+
         myPlayer.Jump();
         StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.JUMP_TIME));
     }
 
     public void Fire()
     {
+        // Don't Fire on damaged, ducking or killed
+        if (myPlayer.isInvincible || myPlayer.hasKilled)
+            return;
+
         myPlayer.Fire();
     }
 
     public void Duck()
     {
+        // Don't Duck on damaged, ducking or killed
+        if (myPlayer.isInvincible || myPlayer.hasKilled)
+            return;
+
         myPlayer.Duck();
         StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.INVINCIBLE_TIME_WHILE_DUCKING));
     }

@@ -8,6 +8,7 @@ public class PhotonPlayer : MonoBehaviour
 {
     public PhotonView view;
     public int id;
+    public bool isInvincible { get { return GetComponent<Collider>().enabled == false; } }
     public bool hasKilled;
 
     [Header("HP")]
@@ -110,11 +111,6 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Jump()
     {
-        // Don't Jump on damaged or ducking
-        bool isInvincible = GetComponent<Collider>().enabled == false;
-        if (isInvincible)
-            return;
-
         view.RPC(RPC_JUMP_METHOD_NAME, RpcTarget.AllBuffered, 0);
 
         audioSource.clip = jumpVoice[Random.Range(0, jumpVoice.Length)];
@@ -159,15 +155,6 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Fire()
     {
-        // Don't Fire if already has killed
-        if (hasKilled)
-            return;
-
-        // Don't Fire on damaged or ducking
-        bool isInvincible = GetComponent<Collider>().enabled == false;
-        if (isInvincible)
-            return;
-
         view.RPC(RPC_FIRE_METHOD_NAME, RpcTarget.AllBuffered, id);
     }
 
@@ -192,11 +179,6 @@ public class PhotonPlayer : MonoBehaviour
 
     public void Duck()
     {
-        // Don't Duck on damaged or ducking
-        bool isInvincible = GetComponent<Collider>().enabled == false;
-        if (isInvincible)
-            return;
-
         view.RPC(RPC_DUCK_METHOD_NAME, RpcTarget.AllBuffered, 0);
     }
 
