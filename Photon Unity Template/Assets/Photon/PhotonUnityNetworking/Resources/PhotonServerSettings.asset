@@ -37,13 +37,13 @@ MonoBehaviour:
   - Fire
   - RespawnSpaceship
   - RPCDisplaySynchronizationTime
+  - RPCDuck
   - RPCFire
+  - RPCInitPlayerModel
   - RPCJump
   - RPCSetOccupied
   - RPCSetUnOccupied
   - RPCUpdateHP
-  - RPCDuck
-  - RPCSetPlayerRotation
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

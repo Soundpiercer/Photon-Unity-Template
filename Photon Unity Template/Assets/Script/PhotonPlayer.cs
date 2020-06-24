@@ -58,7 +58,7 @@ public class PhotonPlayer : MonoBehaviour
     private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 128f);
 
     // RPC
-    private const string RPC_SET_PLAYER_ROTATION_METHOD_NAME = "RPCSetPlayerRotation";
+    private const string RPC_INIT_PLAYER_MODEL = "RPCInitPlayerModel";
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
     private const string RPC_JUMP_METHOD_NAME = "RPCJump";
     private const string RPC_FIRE_METHOD_NAME = "RPCFire";
@@ -74,24 +74,23 @@ public class PhotonPlayer : MonoBehaviour
         }
 
         animator.speed = ANIMATOR_SPEED;
-        animator.SetBool("isMine", view.IsMine);
-        animator.SetTrigger("Entry");
     }
 
     public void Init(int id)
     {
         this.id = id;
-        view.RPC(RPC_SET_PLAYER_ROTATION_METHOD_NAME, RpcTarget.AllBuffered, id);
+        view.RPC(RPC_INIT_PLAYER_MODEL, RpcTarget.AllBuffered, id);
     }
 
     [PunRPC]
-    private void RPCSetPlayerRotation(int id)
+    private void RPCInitPlayerModel(int initializedPlayerId)
     {
-        if (id != 0)
+        if (initializedPlayerId != 0)
         {
             model.transform.rotation = QUATERNION_BACKWARDS;
         }
 
+        animator.SetTrigger("Jump");
         audioSource.clip = initVoice;
         audioSource.Play();
     }
