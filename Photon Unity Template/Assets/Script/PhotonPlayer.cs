@@ -9,6 +9,7 @@ public class PhotonPlayer : MonoBehaviour
     public PhotonView view;
     public int id;
     public bool isInvincible { get { return GetComponent<Collider>().enabled == false; } }
+    public bool hasInitialized;
     public bool hasKilled;
 
     [Header("HP")]
@@ -80,11 +81,28 @@ public class PhotonPlayer : MonoBehaviour
     {
         this.id = id;
         view.RPC(RPC_INIT_PLAYER_MODEL, RpcTarget.AllBuffered, id);
+        hasInitialized = true;
     }
 
     [PunRPC]
     private void RPCInitPlayerModel(int initializedPlayerId)
     {
+        if (view.IsMine)
+            Debug.LogWarning(hasInitialized);
+
+        // don't execute on 'Other' if 'Mine' is initializing
+        if (!hasInitialized && !view.IsMine)
+        {
+            Debug.LogWarning(1);
+            return;
+        }
+        // don't execute on 'Mine' if 'Other' is initializing
+        else if (hasInitialized && view.IsMine)
+        {
+            Debug.LogWarning(2);
+            return;
+        }
+
         if (initializedPlayerId != 0)
         {
             model.transform.rotation = QUATERNION_BACKWARDS;
