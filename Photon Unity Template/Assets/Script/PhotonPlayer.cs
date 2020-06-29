@@ -9,7 +9,6 @@ public class PhotonPlayer : MonoBehaviour
     public PhotonView view;
     public int id;
     public bool isInvincible { get { return GetComponent<Collider>().enabled == false; } }
-    public bool hasInitialized;
     public bool hasKilled;
 
     [Header("HP")]
@@ -59,7 +58,8 @@ public class PhotonPlayer : MonoBehaviour
     private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 128f);
 
     // RPC
-    private const string RPC_INIT_PLAYER_MODEL = "RPCInitPlayerModel";
+    private const string RPC_SET_PLAYER_LOOK_BACKWARDS_METHOD_NAME = "RPCSetPlayerLookBackwards";
+    private const string RPC_INIT_PLAYER_MODEL_METHOD_NAME = "RPCInitPlayerModel";
     private const string RPC_UPDATE_HP_METHOD_NAME = "RPCUpdateHP";
     private const string RPC_JUMP_METHOD_NAME = "RPCJump";
     private const string RPC_FIRE_METHOD_NAME = "RPCFire";
@@ -80,34 +80,22 @@ public class PhotonPlayer : MonoBehaviour
     public void Init(int id)
     {
         this.id = id;
-        view.RPC(RPC_INIT_PLAYER_MODEL, RpcTarget.AllBuffered, id);
-        hasInitialized = true;
+        view.RPC(RPC_SET_PLAYER_LOOK_BACKWARDS_METHOD_NAME, RpcTarget.AllBuffered, id);
+        view.RPC(RPC_INIT_PLAYER_MODEL_METHOD_NAME, RpcTarget.All, 0);
     }
 
     [PunRPC]
-    private void RPCInitPlayerModel(int initializedPlayerId)
+    private void RPCSetPlayerLookBackwards(int initializedPlayerId)
     {
-        if (view.IsMine)
-            Debug.LogWarning(hasInitialized);
-
-        // don't execute on 'Other' if 'Mine' is initializing
-        if (!hasInitialized && !view.IsMine)
-        {
-            Debug.LogWarning(1);
-            return;
-        }
-        // don't execute on 'Mine' if 'Other' is initializing
-        else if (hasInitialized && view.IsMine)
-        {
-            Debug.LogWarning(2);
-            return;
-        }
-
         if (initializedPlayerId != 0)
         {
             model.transform.rotation = QUATERNION_BACKWARDS;
         }
+    }
 
+    [PunRPC]
+    private void RPCInitPlayerModel(int dummy)
+    {
         animator.SetTrigger("Jump");
         audioSource.clip = initVoice;
         audioSource.Play();
@@ -165,7 +153,7 @@ public class PhotonPlayer : MonoBehaviour
             frame++;
             yield return new WaitForFixedUpdate();
         }
-        Debug.LogWarning(frame);
+        //Debug.LogWarning(frame);
         transform.position = new Vector3(transform.position.x, y0, transform.position.z);
     }
     #endregion
