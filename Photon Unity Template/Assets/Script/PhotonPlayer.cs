@@ -25,7 +25,7 @@ public class PhotonPlayer : MonoBehaviour
     [Header("Audio Source")]
     public AudioSource audioSource;
     public AudioClip initVoice;
-    public AudioClip[] jumpVoice;
+    public AudioClip jumpVoice;
     public AudioClip fireVoice;
     public AudioClip[] damageVoice;
     public AudioClip killedVoice;
@@ -118,7 +118,7 @@ public class PhotonPlayer : MonoBehaviour
     {
         view.RPC(RPC_JUMP_METHOD_NAME, RpcTarget.AllBuffered, 0);
 
-        audioSource.clip = jumpVoice[Random.Range(0, jumpVoice.Length)];
+        audioSource.clip = jumpVoice;
         audioSource.Play();
     }
 
@@ -192,7 +192,7 @@ public class PhotonPlayer : MonoBehaviour
     {
         animator.SetTrigger("Duck");
 
-        audioSource.clip = jumpVoice[Random.Range(0, jumpVoice.Length)];
+        audioSource.clip = jumpVoice;
         audioSource.Play();
 
         StartCoroutine(MakePlayerInvincibleWhilePlayingAnimationEnumerator(INVINCIBLE_TIME_WHILE_DUCKING));
@@ -204,7 +204,7 @@ public class PhotonPlayer : MonoBehaviour
 
         animator.SetTrigger("Damaged");
 
-        audioSource.clip = damageVoice[Random.Range(0, jumpVoice.Length)];
+        audioSource.clip = damageVoice[Random.Range(0, damageVoice.Length)];
         audioSource.Play();
 
         StartCoroutine(MakePlayerInvincibleWhilePlayingAnimationEnumerator(INVINCIBLE_TIME_WHILE_DAMAGED));

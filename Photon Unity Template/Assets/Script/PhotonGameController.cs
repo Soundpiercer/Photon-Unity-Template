@@ -12,6 +12,7 @@ using Photon.Realtime;
 public class PhotonGameController : MonoBehaviourPunCallbacks
 {
     public PhotonView view;
+    public Camera mainCamera;
     public PhotonChatController chatController;
 
     [Header("Audio")]
@@ -28,6 +29,9 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public Text fpsText;
     public GameObject quickStartButton;
     public GameObject quitButton;
+    public GameObject horizontalPlane;
+    public GameObject lobbyBackgroundSprite;
+    public LobbyPlayer lobbyPlayer;
 
     private string defaultSuccessMessage = string.Empty;
     private const string QUICKSTART_SUCCESS_MESSAGE = "\nSuccessfully joined by QuickStart, ";
@@ -43,6 +47,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private void Start()
     {
         lobbyBGM.Play();
+        SetLobby3DObjects(true);
 
         Application.targetFrameRate = 60;
         PhotonNetworkManager.Instance.Init(
@@ -54,6 +59,17 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
                 quickStartButton.SetActive(true);
                 StartCoroutine(DisplayRoomNumberEnumerator());
             });
+    }
+
+    private void SetLobby3DObjects(bool isEnter)
+    {
+        horizontalPlane.SetActive(!isEnter);
+        lobbyBackgroundSprite.SetActive(isEnter);
+        lobbyPlayer.gameObject.SetActive(isEnter);
+        if (isEnter)
+        {
+            StartCoroutine(lobbyPlayer.InitEnumerator());
+        }
     }
 
     private IEnumerator DisplayRoomNumberEnumerator()
@@ -75,13 +91,39 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     private void Update()
     {
+        // Display FPS.
         fpsText.text = "FPS : " + System.Math.Round((1 / Time.deltaTime), 4);
 
 #if UNITY_EDITOR
+        // Enable Key Control
         if (myPlayer != null && Input.GetKeyDown(KeyCode.X)) Fire();
         if (myPlayer != null && Input.GetKeyDown(KeyCode.C)) Jump();
         if (myPlayer != null && Input.GetKeyDown(KeyCode.V)) Duck();
+
+        // LobbyPlayer Raycast Event
+        if (Input.GetMouseButtonDown(0))
+        {
+            StartRaycastEvent(mainCamera.ScreenPointToRay(Input.mousePosition));
+        }
+#else
+        // LobbyPlayer Raycast Event
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            StartRaycastEvent(mainCamera.ScreenPointToRay(Input.GetTouch(0).position));
+        }
 #endif
+    }
+
+    private void StartRaycastEvent(Ray ray)
+    {
+        RaycastHit hitObject;
+        if (Physics.Raycast(ray, out hitObject, Mathf.Infinity))
+        {
+            if (hitObject.transform.gameObject.GetComponent<LobbyPlayer>() != null)
+            {
+                lobbyPlayer.PlayAnimationOnRaycastHit();
+            }
+        }
     }
 
     #region UI Interactions
@@ -165,6 +207,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         // UI Setup
         lobbyPanel.SetActive(false);
         gamePanel.SetActive(true);
+        SetLobby3DObjects(false);
 
         // For Synchronization Latency Check
         view.RPC(RPC_DISPLAY_SYNCHRONIZATION_TIME_METHOD_NAME, RpcTarget.AllBuffered, 0);
@@ -275,15 +318,17 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         // Chat DeInit
         chatController.DeInit();
 
+        // Logout from Photon Room
         Logout();
-
-        // UI
-        quickStartButton.SetActive(true);
-        quitButton.SetActive(true);
 
         // Audio
         maingameBGM.Stop();
         lobbyBGM.Play();
+
+        // UI
+        quickStartButton.SetActive(true);
+        quitButton.SetActive(true);
+        SetLobby3DObjects(true);
     }
 
     private void Logout()
