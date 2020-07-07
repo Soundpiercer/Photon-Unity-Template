@@ -200,7 +200,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     [Header("Charge")]
     public Text chargeText;
     private float energy;
-    private const float ENERGY_CHARGE_AMOUNT = 2.4f;
+    private const float ENERGY_CHARGE_AMOUNT = 3.6f;
     private const float ENERGY_MAX = 100f;
     private bool shouldCharge;
 
@@ -307,6 +307,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     public void StartCharge()
     {
+        myPlayer.ChargeStart();
         fireButton.SetActive(false);
         StartCoroutine(ChargeEnumerator());
     }
@@ -333,6 +334,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
     public void EndCharge()
     {
+        myPlayer.ChargeEnd();
         controlButtonRoot.SetActive(true);
         shouldCharge = false;
     }

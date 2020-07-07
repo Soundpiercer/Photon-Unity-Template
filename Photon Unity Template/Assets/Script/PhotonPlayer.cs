@@ -52,8 +52,9 @@ public class PhotonPlayer : MonoBehaviour
     public const float INVINCIBLE_TIME_WHILE_DUCKING = DUCK_ANIMATION_TIME / DUCK_STATE_SPEED / ANIMATOR_SPEED;
     public const float INVINCIBLE_TIME_WHILE_DAMAGED = DAMAGE01_ANIMATION_TIME / DAMAGE01_STATE_SPEED / ANIMATOR_SPEED + DAMAGE01_INVINCIBLE_MARGIN;
 
-    // Bullet
     public const float FIRE_COOLTIME = 0.5f;
+
+    // Bullet
     private const float BULLET_INIT_DISTANCE_X_FROM_MODEL = 24f;
     private const float BULLET_SPEED = 12f;
     private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 128f);
@@ -65,6 +66,8 @@ public class PhotonPlayer : MonoBehaviour
     private const string RPC_JUMP_METHOD_NAME = "RPCJump";
     private const string RPC_FIRE_METHOD_NAME = "RPCFire";
     private const string RPC_DUCK_METHOD_NAME = "RPCDuck";
+    private const string RPC_CHARGE_START_METHOD_NAME = "RPCChargeStart";
+    private const string RPC_CHARGE_END_METHOD_NAME = "RPCChargeEnd";
     #endregion
 
     private void Start()
@@ -198,6 +201,28 @@ public class PhotonPlayer : MonoBehaviour
         audioSource.Play();
 
         StartCoroutine(MakePlayerInvincibleWhilePlayingAnimationEnumerator(INVINCIBLE_TIME_WHILE_DUCKING));
+    }
+
+    public void ChargeStart()
+    {
+        view.RPC(RPC_CHARGE_START_METHOD_NAME, RpcTarget.AllBuffered, 0);
+    }
+
+    [PunRPC]
+    private void RPCChargeStart(int dummy)
+    {
+        animator.SetTrigger("ChargeStart");
+    }
+
+    public void ChargeEnd()
+    {
+        view.RPC(RPC_CHARGE_END_METHOD_NAME, RpcTarget.AllBuffered, 0);
+    }
+
+    [PunRPC]
+    private void RPCChargeEnd(int dummy)
+    {
+        animator.SetTrigger("ChargeEnd");
     }
 
     public void GotDamaged(int damage)

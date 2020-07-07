@@ -36,15 +36,17 @@ MonoBehaviour:
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
+  - RPCChargeEnd
+  - RPCChargeStart
   - RPCDisplaySynchronizationTime
   - RPCDuck
   - RPCFire
   - RPCInitPlayerModel
   - RPCJump
   - RPCSetOccupied
+  - RPCSetPlayerLookBackwards
   - RPCSetUnOccupied
   - RPCUpdateHP
-  - RPCSetPlayerLookBackwards
   DisableAutoOpenWizard: 1
-  ShowSettings: 1
+  ShowSettings: 0
   DevRegionSetOnce: 1
