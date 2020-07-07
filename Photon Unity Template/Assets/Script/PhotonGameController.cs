@@ -30,7 +30,6 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     public GameObject quickStartButton;
     public GameObject quitButton;
     public GameObject horizontalPlane;
-    public GameObject lobbyBackgroundSprite;
     public LobbyPlayer lobbyPlayer;
 
     private string defaultSuccessMessage = string.Empty;
@@ -64,7 +63,6 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     private void SetLobby3DObjects(bool isEnter)
     {
         horizontalPlane.SetActive(!isEnter);
-        lobbyBackgroundSprite.SetActive(isEnter);
         lobbyPlayer.gameObject.SetActive(isEnter);
         if (isEnter)
         {
