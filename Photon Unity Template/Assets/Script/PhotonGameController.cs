@@ -286,6 +286,7 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
             return;
 
         myPlayer.Fire();
+        StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.FIRE_COOLTIME));
     }
 
     public void Duck()
