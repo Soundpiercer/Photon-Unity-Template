@@ -53,6 +53,7 @@ public class PhotonPlayer : MonoBehaviour
     public const float INVINCIBLE_TIME_WHILE_DAMAGED = DAMAGE01_ANIMATION_TIME / DAMAGE01_STATE_SPEED / ANIMATOR_SPEED + DAMAGE01_INVINCIBLE_MARGIN;
 
     // Bullet
+    public const float FIRE_COOLTIME = 0.5f;
     private const float BULLET_INIT_DISTANCE_X_FROM_MODEL = 24f;
     private const float BULLET_SPEED = 12f;
     private readonly Vector3 BULLET_INIT_DISTANCE_Y_FROM_GROUND = new Vector3(0, 128f);
@@ -127,6 +128,7 @@ public class PhotonPlayer : MonoBehaviour
     {
         animator.SetTrigger("Jump");
         StartCoroutine(PhysicalJumpEnumerator());
+        StartCoroutine(MakePlayerInvincibleWhilePlayingAnimationEnumerator(JUMP_TIME));
     }
 
     #region Physical Jump Implementation
