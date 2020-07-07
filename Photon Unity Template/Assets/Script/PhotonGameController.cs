@@ -194,7 +194,15 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
     [Header("Game Panel")]
     public GameObject gameDefaultUIRoot;
     public GameObject controlButtonRoot;
+    public GameObject fireButton;
     public Text synchronizationTimeText;
+
+    [Header("Charge")]
+    public Text chargeText;
+    private float energy;
+    private const float ENERGY_CHARGE_AMOUNT = 2.4f;
+    private const float ENERGY_MAX = 100f;
+    private bool shouldCharge;
 
     private void StartPhotonGame()
     {
@@ -206,6 +214,10 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         lobbyPanel.SetActive(false);
         gamePanel.SetActive(true);
         SetLobby3DObjects(false);
+
+        // Charge
+        energy = 0;
+        chargeText.text = Mathf.Floor(energy).ToString();
 
         // For Synchronization Latency Check
         view.RPC(RPC_DISPLAY_SYNCHRONIZATION_TIME_METHOD_NAME, RpcTarget.AllBuffered, 0);
@@ -287,6 +299,42 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
 
         myPlayer.Fire();
         StartCoroutine(HideButtonsWhileDoingActionEnumerator(PhotonPlayer.FIRE_COOLTIME));
+
+        energy = 0;
+        chargeText.text = Mathf.Floor(energy).ToString();
+        fireButton.SetActive(false);
+    }
+
+    public void StartCharge()
+    {
+        fireButton.SetActive(false);
+        StartCoroutine(ChargeEnumerator());
+    }
+
+    private IEnumerator ChargeEnumerator()
+    {
+        shouldCharge = true;
+        while (shouldCharge)
+        {
+            energy = Mathf.Clamp(energy + ENERGY_CHARGE_AMOUNT, 0, ENERGY_MAX);
+            chargeText.text = Mathf.Floor(energy).ToString();
+
+            if (Mathf.Abs(energy - ENERGY_MAX) < float.Epsilon)
+            {
+                fireButton.SetActive(true);
+                yield break;
+            }
+            else
+            {
+                yield return null;
+            }      
+        }
+    }
+
+    public void EndCharge()
+    {
+        controlButtonRoot.SetActive(true);
+        shouldCharge = false;
     }
 
     public void Duck()
@@ -313,6 +361,10 @@ public class PhotonGameController : MonoBehaviourPunCallbacks
         controlButtonRoot.SetActive(false);
         gamePanel.SetActive(false);
         lobbyPanel.SetActive(true);
+
+        // Charge DeInit
+        energy = 0;
+        chargeText.text = Mathf.Floor(energy).ToString();
 
         // Chat DeInit
         chatController.DeInit();
